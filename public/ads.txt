@@ -1,0 +1,4 @@
+# Google AdSense authorised seller declaration.
+# After AdSense approves your site, replace pub-0000000000000000 with your own publisher ID
+# (the ca-pub-… number without the "ca-" prefix) and remove the "#" at the start of the line below.
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

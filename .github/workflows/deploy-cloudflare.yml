@@ -1,0 +1,44 @@
+# Optional: deploy to Cloudflare Pages from GitHub Actions.
+# Alternative (no secrets needed): connect this repository in the Cloudflare dashboard
+# (Workers & Pages → Create → Pages → Connect to Git) with build command `npm run build`
+# and build output directory `public`.
+#
+# To use this workflow instead, add two repository secrets:
+#   CLOUDFLARE_API_TOKEN  — token with the "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID — your Cloudflare account ID
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: npm run build
+      - name: Check Cloudflare secrets
+        id: secrets
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: echo "present=$([ -n "$TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Deploy
+        if: steps.secrets.outputs.present == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=cbt-toolkit --branch=${{ github.ref_name }}
+      - name: Skipped (no Cloudflare secrets)
+        if: steps.secrets.outputs.present != 'true'
+        run: echo "CLOUDFLARE_API_TOKEN is not set — skipping deploy. See README → Deploy."
