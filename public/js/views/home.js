@@ -11,6 +11,9 @@ import { ASSESSMENT_BY_ID, scoreAssessment } from '../data/assessments.js';
 import { areaStyle, adSlot, levelBadge, statTile } from '../ui/components.js';
 import { cycleBlock, mountCycles } from '../ui/cycle.js';
 import { describeRecord } from '../ui/records.js';
+import { dailyStats, todaysCheckin, todaysReflection, programProgress, recommend } from '../lib/coach.js';
+import { dayKey } from '../core/format.js';
+import { pref } from '../core/dom.js';
 
 export async function homeView() {
   const all = store.all();
@@ -22,15 +25,30 @@ export async function homeView() {
   const lastScore = lastCheck ? (() => { const a = ASSESSMENT_BY_ID[lastCheck.type]; const s = scoreAssessment(a, lastCheck.data.answers); return `${a.name}: ${s.score}${a.percent ? '%' : ''} (${s.band.label})`; })() : null;
   const recent = store.all().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 4);
   const cycles = [{ ...MISTAKE_CYCLE }, ...AREAS.map((a) => ({ id: a.id, name: a.short, ...a.cycle }))];
+  const now = new Date();
+  const settings = (await store.kvGet('daily-settings', null)) || {};
+  const ds = dailyStats(all, now, settings.weeklyGoal || 5);
+  const ci = todaysCheckin(all, now), rf = todaysReflection(all, now);
+  const practised = all.some((r) => r.kind === 'exercise' && dayKey(r.createdAt) === dayKey(now));
+  const skillSeen = pref.get('skill-seen') === dayKey(now);
+  const stepsDone = [ci, practised, skillSeen, rf].filter(Boolean).length;
+  const prog = programProgress(await store.kvGet('program', null), all, now);
+  const next = has ? recommend({ records: all, now, plan: await store.kvGet('plan', null), programState: await store.kvGet('program', null), limit: 1 })[0] : null;
+  const todayCard = has ? html`<section class="card today-card-home" style="margin-top:8px"><div class="split">
+      <div><p class="eyebrow" style="margin:0">Your day · ${stepsDone} of 4 steps done</p><h2 style="margin:4px 0 6px">${stepsDone === 4 ? 'All done for today — well done.' : !ci ? 'Start with a 30-second check-in' : next ? `Up next — ${next.title}` : 'Keep going'}</h2>
+        <div class="meta"><span>${icon('bolt')} ${ds.streak}-day streak</span><span>${icon('calendar')} ${ds.weekPractice}/${ds.weeklyGoal} practice days this week</span>${prog && !prog.finished ? html`<span>${icon('map')} ${prog.program.name}: day ${prog.index + 1} of ${prog.program.days}</span>` : ''}</div></div>
+      <a class="btn primary" href="#/today">${icon('sun')} ${stepsDone ? 'Continue today' : 'Open today'} ${icon('arrow')}</a></div></section>` : '';
 
   const body = html`<div class="container">
+    ${todayCard}
     <section class="hero"><div class="hero-card">
       <p class="eyebrow">Cognitive Behavioural Therapy, made simple</p>
       <h1>Small, proven steps to feel better and get more out of life.</h1>
       <p class="lead">Practical CBT exercises for low mood, anxiety, procrastination, habits, time, intimacy and impulses — explained in plain words with everyday examples, and backed by ${research.length} research papers you can check yourself.</p>
       <div class="cluster" style="margin-top:18px">
-        <a class="btn primary" href="#/check-in">${icon('clipboard')} Take a 2-minute check-in</a>
-        <a class="btn" href="#/learn">${icon('book')} What is CBT? (3-minute read)</a>
+        <a class="btn primary" href="#/today">${icon('sun')} Start your daily CBT</a>
+        <a class="btn" href="#/programs">${icon('map')} Follow a guided programme</a>
+        <a class="btn ghost" href="#/learn">${icon('book')} What is CBT? (3-minute read)</a>
       </div>
       <div class="meta" style="margin-top:16px"><span>${icon('lock')} Private — saved only on this device</span><span>${icon('check')} ${EXERCISES.length} interactive exercises</span><span>${icon('flask')} ${research.length} verified studies</span><span>${icon('sparkle')} Free · no account</span></div>
     </div></section>
@@ -81,7 +99,7 @@ export async function homeView() {
 
     <section class="section grid-2">
       <div class="card"><h2 style="font-size:1.25rem">${icon('flask')} Built on evidence — and honest about it</h2>
-        <p class="muted">Every exercise shows how strong its evidence is and links to the studies behind it. Each of the ${research.length} references was matched against Crossref (the official DOI registry), and most were checked against their PubMed abstracts.</p>
+        <p class="muted">Every exercise shows how strong its evidence is and links to the studies behind it. All ${research.filter((r) => r.doi).length} references with a DOI were matched against Crossref (the official DOI registry), and ${research.filter((r) => /abstract/i.test(r.verified || '')).length} were checked against their published abstracts on PubMed or OpenAlex. Books and official guidelines link to their publisher.</p>
         <div class="stack" style="--gap:8px">${Object.entries(LEVELS).map(([k, v]) => html`<div class="cluster" style="--gap:10px">${levelBadge(k)}<span class="small muted">${v.desc}</span></div>`)}</div>
         <p style="margin:14px 0 0"><a href="#/research">Browse the research library →</a></p></div>
       <div class="card"><h2 style="font-size:1.25rem">${icon('lock')} Private by design</h2>

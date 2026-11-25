@@ -6,7 +6,7 @@ import { AREAS, AREA_BY_ID } from '../data/areas.js';
 import { EXERCISE_BY_ID, exercisesForArea } from '../data/exercises/index.js';
 import { research } from '../data/research.js';
 import { ASSESSMENT_BY_ID } from '../data/assessments.js';
-import { areaStyle, adSlot, cite, exerciseCard, pageHead, refCard, REF_BY_ID, crisisCallout } from '../ui/components.js';
+import { areaStyle, adSlot, cite, exerciseCard, pageHead, refCard, REF_BY_ID, crisisCallout, notFoundPage } from '../ui/components.js';
 import { cycleBlock, mountCycles } from '../ui/cycle.js';
 
 export async function areasView() {
@@ -23,7 +23,7 @@ export async function areasView() {
 
 export async function areaView({ params }) {
   const a = AREA_BY_ID[params.id];
-  if (!a) return { title: 'Not found', body: html`<div class="container"><p>Area not found. <a href="#/areas">See all areas</a></p></div>` };
+  if (!a) return notFoundPage('Area', '#/areas', 'See all areas');
   const exs = a.order.map((id) => EXERCISE_BY_ID[id]);
   const cross = exercisesForArea(a.id).filter((e) => !a.order.includes(e.id));
   const refs = research.filter((r) => r.areas.includes(a.id)).sort((x, y) => (y.areas[0] === a.id) - (x.areas[0] === a.id) || (/meta|review/i.test(y.type) - /meta|review/i.test(x.type)) || y.year - x.year);
@@ -39,7 +39,7 @@ export async function areaView({ params }) {
     <div class="grid-2 wide-left">
       <section class="callout simple"><div class="callout-title">${icon('info')} In simple words</div><p>${a.simple}</p>
         ${a.definitionRef ? html`<p class="small muted" style="margin:0">Definition based on ${cite(a.definitionRef)}.</p>` : ''}</section>
-      <section class="card flat"><h3>${icon('clipboard')} Where are you now?</h3>
+      <section class="card flat"><h2 class="h3">${icon('clipboard')} Where are you now?</h2>
         ${lastCheck ? html`<p class="small">Your last ${check.name} check was ${relTime(lastCheck.createdAt)}.</p>` : html`<p class="small muted">Take the ${check.minutes}-minute ${check.title.toLowerCase()} to get a baseline you can track.</p>`}
         <a class="btn small soft" href="#/check-in/${a.checkin}">${lastCheck ? 'Check in again' : 'Take it now'}</a></section>
     </div>

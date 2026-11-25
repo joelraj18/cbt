@@ -14,6 +14,7 @@ export async function toolboxView() {
   return {
     title: 'Toolbox',
     body: html`<div class="container">${pageHead({ title: 'Toolbox', lede: 'Quick, guided tools for hard moments. Pick what matches how you feel right now.' })}
+      <h2 class="sr-only">Tools</h2>
       <div class="grid" style="--min:250px">${TOOLS.map(([id, ic, when]) => { const ex = EXERCISE_BY_ID[id]; return html`<a class="card card-link" href="#/exercise/${id}?tab=do" ${areaStyle(ex.area)}>
         <div class="card-head"><span class="area-icon">${icon(ic)}</span><div><div class="small faint">When: ${when}</div><h3 style="margin:2px 0 0">${ex.title}</h3></div></div>
         <p class="small muted" style="margin:10px 0 8px">${ex.tagline}</p><div class="cluster" style="--gap:6px">${levelBadge(ex.level)}<span class="badge">${ex.minutes} min</span></div></a>`; })}</div>

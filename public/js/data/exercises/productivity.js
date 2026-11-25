@@ -1,4 +1,5 @@
 import { rate, pct, text, long, num, chips, radio, info, when, date, emotions, n, delta, short, sign } from './_fields.js';
+import { html } from '../../core/dom.js';
 
 const EXCUSES = ['"I’ll do it when I feel like it"', '"I work better under pressure"', '"It has to be perfect"', '"I’ll just check my phone first"', '"I don’t know where to start"', '"I’m too tired right now"', '"There’s plenty of time"', '"It’s pointless anyway"'];
 
@@ -21,7 +22,7 @@ export default [
       text('action', '…then I will…', { required: true, placeholder: 'e.g. open the document and write for 25 minutes' }),
       text('obstacle', 'If this obstacle happens… (optional)', { placeholder: 'e.g. I feel the urge to check my phone' }),
       text('response', '…then I will…', { placeholder: 'e.g. put it in the drawer and keep writing' }),
-      { id: 'plan', type: 'computed', label: 'Your plan', compute: (d) => (d.cue && d.action ? `<strong>If</strong> ${esc(d.cue)}, <strong>then I will</strong> ${esc(d.action)}.${d.obstacle && d.response ? `<br><strong>If</strong> ${esc(d.obstacle)}, <strong>then I will</strong> ${esc(d.response)}.` : ''}` : 'Fill in the "If" and "then" parts to see your plan.') },
+      { id: 'plan', type: 'computed', label: 'Your plan', compute: (d) => (d.cue && d.action ? html`<strong>If</strong> ${d.cue}, <strong>then I will</strong> ${d.action}.${d.obstacle && d.response ? html`<br><strong>If</strong> ${d.obstacle}, <strong>then I will</strong> ${d.response}.` : ''}` : 'Fill in the "If" and "then" parts to see your plan.') },
       rate('confidence', 'How confident are you that you’ll follow it?', { minLabel: '0 = not at all', maxLabel: '10 = certain' }),
       radio('result', 'Later: did it work?', ['Not tried yet', 'Yes — I followed it', 'Partly', 'No — I’ll adjust the plan']),
     ] },
@@ -191,5 +192,4 @@ export default [
   },
 ];
 
-function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function fmtMin(m) { const h = Math.floor(m / 60), r = m % 60; return h ? `${h}h ${r ? r + 'm' : ''}`.trim() : `${r}m`; }

@@ -1,6 +1,10 @@
 // Schema-driven exercise forms: step-by-step wizard, autosaved drafts, validation,
 // live computed results, repeatable lists, emotion pickers and timed rating trackers.
-import { html, raw, esc, on, debounce, pref } from '../core/dom.js';
+import { html, raw, esc, on, debounce, pref, SafeHTML } from '../core/dom.js';
+
+// Computed results are plain text unless the exercise explicitly returns a SafeHTML template (html``),
+// so values typed by the user (or loaded from an imported backup) can never inject markup.
+const computedOut = (v) => (v instanceof SafeHTML ? v : raw(esc(v ?? '')));
 import { fmtDuration, relTime } from '../core/format.js';
 import { icon } from '../core/icons.js';
 
@@ -49,8 +53,8 @@ function fieldHTML(f, data, uidp, trackers) {
   const hidden = f.showIf && !f.showIf(data) ? raw('hidden') : '';
   const wrap = (inner, extra = '') => html`<div class="field" data-field="${f.id || ''}" ${hidden} ${raw(extra)}>${label}${help}${inner}<div class="err" data-err="${f.id || ''}" hidden></div></div>`;
   switch (f.type) {
-    case 'info': return html`<div class="callout ${f.tone || 'info'}" data-field="${f.id || ''}" ${hidden}>${f.title ? html`<div class="callout-title">${f.title}</div>` : ''}${typeof f.html === 'function' ? raw(f.html(data)) : f.html ? raw(f.html) : f.text}</div>`;
-    case 'computed': return html`<div class="field" data-field="${f.id}" ${hidden}>${f.label ? html`<div class="label">${f.label}</div>` : ''}<div class="computed" data-computed="${f.id}" aria-live="polite">${raw(f.compute(data) ?? '')}</div></div>`;
+    case 'info': return html`<div class="callout ${f.tone || 'info'}" data-field="${f.id || ''}" ${hidden}>${f.title ? html`<div class="callout-title">${f.title}</div>` : ''}${typeof f.html === 'function' ? computedOut(f.html(data)) : f.html ? raw(f.html) : f.text}</div>`;
+    case 'computed': return html`<div class="field" data-field="${f.id}" ${hidden}>${f.label ? html`<div class="label">${f.label}</div>` : ''}<div class="computed" data-computed="${f.id}" aria-live="polite">${computedOut(f.compute(data))}</div></div>`;
     case 'radio': return wrap(html`<div class="radio-cards" role="radiogroup" aria-label="${f.label}">${opts(f).map((o, i) => html`<label class="radio-card"><input type="radio" name="${id}" data-fid="${f.id}" value="${o.value}" ${o.value === v ? raw('checked') : ''} ${i === 0 ? raw(`id="${id}"`) : ''}><span>${o.label}${o.help ? html`<br><span class="small muted">${o.help}</span>` : ''}</span></label>`)}</div>`);
     case 'chips': {
       const sel = new Set(v || []);
@@ -93,8 +97,10 @@ function fieldHTML(f, data, uidp, trackers) {
   }
 }
 
-export function trackerSVG(points, max = 10, W = 560, H = 120) {
-  if (!points || points.length < 1) return '';
+export function trackerSVG(rawPoints, max = 10, W = 560, H = 120) {
+  if (!Array.isArray(rawPoints) || rawPoints.length < 1) return '';
+  max = Number(max) || 10;
+  const points = rawPoints.map((p) => ({ t: Math.max(0, Number(p?.t) || 0), v: Math.max(0, Math.min(max, Number(p?.v) || 0)) }));
   const tMax = Math.max(60, points.at(-1).t);
   const x = (t) => 8 + (t / tMax) * (W - 16), y = (v) => H - 18 - (v / max) * (H - 30);
   const d = points.map((p, i) => `${i ? 'L' : 'M'}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join('');
@@ -133,7 +139,7 @@ export function createForm(container, schema, options = {}) {
   function refreshDynamic() {
     for (const f of allFields) {
       if (f.showIf) { const n = container.querySelector(`[data-field="${f.id}"]`); if (n) n.hidden = !f.showIf(data); }
-      if (f.type === 'computed') { const n = container.querySelector(`[data-computed="${f.id}"]`); if (n) n.innerHTML = String(f.compute(data) ?? ''); }
+      if (f.type === 'computed') { const n = container.querySelector(`[data-computed="${f.id}"]`); if (n) n.innerHTML = String(computedOut(f.compute(data))); }
     }
   }
 

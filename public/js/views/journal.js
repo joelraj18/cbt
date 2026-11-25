@@ -12,7 +12,7 @@ export async function journalView({ query }) {
   const body = html`<div class="container">${pageHead({ title: 'Journal', lede: 'Everything you have saved — exercises, check-ins and mood logs. Stored only on this device.' })}
     <div class="card flat" style="margin-bottom:18px"><div class="grid" style="--min:170px;--gap:12px">
       <div class="search-box" style="grid-column:1/-1">${icon('search')}<input type="search" data-q placeholder="Search your own entries… (never leaves your device)" value="${query.q || ''}" aria-label="Search your entries"></div>
-      <div><label class="label small" for="jf-kind">Type</label><select id="jf-kind"><option value="">All types</option><option value="exercise">Exercises</option><option value="assessment">Check-ins</option><option value="mood">Mood logs</option></select></div>
+      <div><label class="label small" for="jf-kind">Type</label><select id="jf-kind"><option value="">All types</option><option value="exercise">Exercises</option><option value="assessment">Check-ins</option><option value="mood">Mood logs & check-ins</option><option value="daily">Evening reflections</option></select></div>
       <div><label class="label small" for="jf-area">Area</label><select id="jf-area"><option value="">All areas</option>${AREAS.map((a) => html`<option value="${a.id}">${a.name}</option>`)}</select></div>
       <div><label class="label small" for="jf-range">Period</label><select id="jf-range"><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="" selected>All time</option></select></div>
       <div style="align-self:end"><button class="btn block" data-csv>${icon('download')} Export CSV</button></div>
@@ -40,7 +40,7 @@ export async function journalView({ query }) {
       if (!recs.length) { list.innerHTML = String(store.count() ? emptyState('No entries match', 'Try a different filter or search.', '') : emptyState('Your journal is empty', 'Entries from exercises, check-ins and mood logs will appear here.', html`<a class="btn primary" href="#/areas">Start an exercise</a>`)); return; }
       const groups = new Map();
       recs.forEach((r) => { const k = dayKey(r.createdAt); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
-      list.innerHTML = String(html`${[...groups.entries()].slice(0, 120).map(([k, rs]) => html`<section class="card flat" style="margin-bottom:12px"><h3 style="font-size:.95rem;margin:0 0 4px">${fmtDate(k + 'T12:00:00', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h3>
+      list.innerHTML = String(html`${[...groups.entries()].slice(0, 120).map(([k, rs]) => html`<section class="card flat" style="margin-bottom:12px"><h2 style="font-size:.95rem;margin:0 0 4px">${fmtDate(k + 'T12:00:00', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h2>
         ${rs.map((r) => { const d = describeRecord(r); const m = hl?.get(r.id); return html`<div class="entry"><div class="entry-head"><span>${d.area ? html`<span class="area-dot" style="--area:${areaColor(d.area)};margin-right:6px"></span>` : ''}<a class="entry-title" href="${d.url}">${d.title}</a> <span class="badge">${d.type}</span></span>
           <span class="cluster" style="--gap:6px"><span class="small faint">${fmtTime(r.createdAt)}</span><button class="btn small ghost" data-del="${r.id}" aria-label="Delete entry">${icon('trash')}</button></span></div>
           <div class="entry-body">${m && m.snippet.length ? segs(m.snippet) : d.summary}</div></div>`; })}</section>`)}`);

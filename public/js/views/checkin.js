@@ -6,7 +6,7 @@ import { fmtDate, relTime, fmtNum, fmtMs, signed } from '../core/format.js';
 import { ASSESSMENTS, ASSESSMENT_BY_ID, scoreAssessment, compareScores } from '../data/assessments.js';
 import { AREA_BY_ID } from '../data/areas.js';
 import { EXERCISE_BY_ID } from '../data/exercises/index.js';
-import { pageHead, crisisCallout, cite, areaStyle, refCard, REF_BY_ID } from '../ui/components.js';
+import { pageHead, crisisCallout, cite, areaStyle, refCard, REF_BY_ID, notFoundPage } from '../ui/components.js';
 import { lineChart } from '../lib/charts.js';
 
 const unit = (a) => (a.percent ? '%' : '');
@@ -29,7 +29,7 @@ export async function checkinListView() {
 
 export async function checkinView({ params }) {
   const a = ASSESSMENT_BY_ID[params.id];
-  if (!a) return { title: 'Not found', body: html`<div class="container"><p>Questionnaire not found. <a href="#/check-in">All check-ins</a></p></div>` };
+  if (!a) return notFoundPage('Questionnaire', '#/check-in', 'All check-ins');
   const area = AREA_BY_ID[a.area];
   const opts = a.allowNA ? [...a.options, { value: 'na', label: 'Doesn’t apply' }] : a.options;
   const body = html`<div class="container narrow" ${a.area !== 'general' ? areaStyle(a.area) : ''}>

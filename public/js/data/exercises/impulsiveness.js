@@ -1,5 +1,6 @@
 import { rate, pct, text, long, num, chips, radio, info, when, date, traps, emotions, n, delta, short, sign } from './_fields.js';
 import { mean } from '../../lib/stats.js';
+import { html } from '../../core/dom.js';
 
 export default [
   {
@@ -183,7 +184,7 @@ export default [
     form: { fields: [
       rate('hungry', 'Hungry'), rate('angry', 'Angry or upset'), rate('lonely', 'Lonely'), rate('tired', 'Tired'), rate('stressed', 'Stressed'),
       { id: 'sub', type: 'checklist', label: 'Also…', options: ['Had alcohol or drugs', 'Feeling ill or in pain', 'Slept under 6 hours'] },
-      { id: 'score', type: 'computed', label: 'Vulnerability', compute: (d) => { const s = vulnScore(d); return `<strong>${s}/100</strong> — ${s >= 60 ? 'high: postpone big decisions and top up the basics first' : s >= 35 ? 'moderate: worth a quick fix' : 'low'}.`; } },
+      { id: 'score', type: 'computed', label: 'Vulnerability', compute: (d) => { const s = vulnScore(d); return html`<strong>${s}/100</strong> — ${s >= 60 ? 'high: postpone big decisions and top up the basics first' : s >= 35 ? 'moderate: worth a quick fix' : 'low'}.`; } },
       text('fix', 'One quick fix', { required: true }),
     ] },
     summarize: (d) => `Vulnerability ${vulnScore(d)}/100 · fix: ${short(d.fix, 40)}`,

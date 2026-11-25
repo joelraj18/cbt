@@ -6,9 +6,12 @@ import { EXERCISES } from '../data/exercises/index.js';
 import { research } from '../data/research.js';
 import { ASSESSMENTS } from '../data/assessments.js';
 import { CBT_GUIDE, THINKING_TRAPS, GLOSSARY, FAQ } from '../data/learn.js';
+import { PROGRAMS } from '../data/programs.js';
 
 export const PAGES = [
   { id: 'home', title: 'Home', url: '#/', summary: 'Start here: check in, choose an area and practise evidence-based CBT exercises.' },
+  { id: 'today', title: 'Today — your daily CBT', url: '#/today', summary: 'Daily check-in, personalised practice for today, skill of the day, evening reflection, streaks and daily reminders.' },
+  { id: 'programs', title: 'Guided programmes', url: '#/programs', summary: 'Day-by-day CBT programmes: 28-day CBT Foundations and 14-day programmes for mood, anxiety, focus, habits, time, intimacy and urges.' },
   { id: 'areas', title: 'All areas', url: '#/areas', summary: 'Depression, anxiety, productivity, self-discipline, time management, sexual desire and impulsiveness.' },
   { id: 'toolbox', title: 'Toolbox — quick tools', url: '#/toolbox', summary: 'Breathing pacer, muscle relaxation, urge surfing timer, focus sprints, grounding and the STOP skill.' },
   { id: 'check-in', title: 'Check-ins & questionnaires', url: '#/check-in', summary: 'PHQ-9 depression, GAD-7 anxiety, WHO-5 wellbeing and area check-ins to measure progress.' },
@@ -16,7 +19,7 @@ export const PAGES = [
   { id: 'plan', title: 'My plan', url: '#/plan', summary: 'A personalised weekly practice plan with calendar reminders.' },
   { id: 'journal', title: 'Journal — all my entries', url: '#/journal', summary: 'Browse, search, edit and export everything you have saved.' },
   { id: 'reports', title: 'Progress reports', url: '#/reports', summary: 'Charts, trends, reliable change and personalised insights from your data, with research context. Print or export.' },
-  { id: 'research', title: 'Research library', url: '#/research', summary: '186 verified research papers behind every exercise, with plain-language summaries.' },
+  { id: 'research', title: 'Research library', url: '#/research', summary: `${research.length} verified research papers behind every exercise, with plain-language summaries.` },
   { id: 'learn', title: 'What is CBT? A plain-language guide', url: '#/learn', summary: 'How thoughts, feelings, body and behaviour are linked, with everyday examples; thinking traps; glossary; FAQ.' },
   { id: 'help', title: 'Get help now — crisis lines', url: '#/help', summary: 'Crisis lines and emergency numbers, and how to find a CBT therapist.' },
   { id: 'settings', title: 'Settings, backup & privacy', url: '#/settings', summary: 'Theme, text size, encrypted backup, import/export, delete all data, storage usage.' },
@@ -42,6 +45,7 @@ export function buildIndex() {
   CBT_GUIDE.forEach((g) => e.add({ id: 'guide:' + g.id, kind: 'learn', title: g.title, url: `#/learn?s=${g.id}`, summary: g.body[0].replace(/<[^>]+>/g, ''), body: g.body.join(' ').replace(/<[^>]+>/g, ' ') }));
   THINKING_TRAPS.forEach((t) => e.add({ id: 'trap:' + t.id, kind: 'learn', title: `Thinking trap: ${t.name}`, url: '#/learn?s=traps', tags: ['thinking trap', 'cognitive distortion'], summary: t.simple, body: `${t.example} ${t.question}` }));
   GLOSSARY.forEach((g) => e.add({ id: 'gl:' + g.term, kind: 'learn', title: g.term, url: '#/learn?s=glossary', tags: ['glossary'], summary: g.def }));
+  PROGRAMS.forEach((p) => e.add({ id: 'prog:' + p.id, kind: 'page', area: p.area, title: `Programme: ${p.name} (${p.days} days)`, url: `#/programs/${p.id}`, summary: p.summary, body: p.plan.map((d) => `${d.title} ${d.lesson} ${d.task}`).join(' '), boost: 1.15 }));
   FAQ.forEach((f, i) => e.add({ id: 'faq:' + i, kind: 'learn', title: f.q, url: '#/learn?s=faq', tags: ['faq'], summary: f.a }));
   const stats = e.build();
   stats.totalMs = perf.now() - t0;

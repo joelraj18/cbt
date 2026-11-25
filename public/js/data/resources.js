@@ -16,7 +16,7 @@ export const CRISIS_LINES = [
   { region: 'United Kingdom & Ireland', name: 'Samaritans', contact: 'Call 116 123', url: 'https://www.samaritans.org', hours: '24/7, free' },
   { region: 'United Kingdom', name: 'Shout', contact: 'Text SHOUT to 85258', url: 'https://giveusashout.org', hours: '24/7' },
   { region: 'England', name: 'NHS 111 (mental health option)', contact: 'Call 111, choose the mental health option', url: 'https://www.nhs.uk/nhs-services/mental-health-services/where-to-get-urgent-help-for-mental-health/', hours: '24/7' },
-  { region: 'Ireland', name: 'Text About It (50808)', contact: 'Text HELLO to 50808', url: 'https://text50808.ie', hours: '24/7' },
+  { region: 'Ireland', name: 'Text About It (50808)', contact: 'Text HELLO to 50808', url: 'https://www.textaboutit.ie', hours: '24/7' },
   { region: 'Australia', name: 'Lifeline', contact: 'Call 13 11 14', url: 'https://www.lifeline.org.au', hours: '24/7' },
   { region: 'Australia', name: 'Beyond Blue', contact: 'Call 1300 22 4636', url: 'https://www.beyondblue.org.au', hours: '24/7' },
   { region: 'New Zealand', name: 'Need to talk?', contact: 'Call or text 1737', url: 'https://1737.org.nz', hours: '24/7' },
@@ -28,7 +28,7 @@ export const CRISIS_LINES = [
 export const FIND_THERAPIST = [
   { name: 'NHS Talking Therapies (England)', desc: 'Free CBT on the NHS — you can refer yourself.', url: 'https://www.nhs.uk/service-search/mental-health/find-an-nhs-talking-therapies-service' },
   { name: 'BABCP — CBT Register UK', desc: 'Find an accredited CBT therapist in the UK and Ireland.', url: 'https://www.cbtregisteruk.com' },
-  { name: 'ABCT — Find a CBT Therapist (US)', desc: 'Directory from the Association for Behavioral and Cognitive Therapies.', url: 'https://www.findcbt.org' },
+  { name: 'ABCT — Find a CBT Therapist (US)', desc: 'Association for Behavioral and Cognitive Therapies — use “Find a Therapist” on their site.', url: 'https://www.abct.org' },
   { name: 'Psychology Today directory', desc: 'International therapist directory; filter by "Cognitive Behavioral (CBT)".', url: 'https://www.psychologytoday.com' },
   { name: 'AASECT (sex therapy)', desc: 'Certified sex therapists and counsellors (US & international).', url: 'https://www.aasect.org' },
   { name: 'Mind (UK charity)', desc: 'Plain-language guides to talking therapies and other treatments.', url: 'https://www.mind.org.uk' },

@@ -43,6 +43,7 @@ const check = (name, ok, detail = '') => { results.push([name, ok]); console.log
   await page.waitForTimeout(500);
   check('thought record saved via 5-step wizard', (await count('thought-record')) === 1);
   check('result panel shown', await page.isVisible('text=Saved — nice work.'));
+  check('result panel links back to Today', await page.isVisible('.result-panel a[href="#/today"], a.btn[href="#/today"]:has-text("Back to Today")'));
   await page.click('[data-tab="history"]');
   await page.waitForTimeout(300);
   check('history tab lists the entry', (await page.locator('[data-list] details').count()) === 1);
@@ -109,6 +110,57 @@ const check = (name, ok, detail = '') => { results.push([name, ok]); console.log
   await page.click('[data-save]');
   await page.waitForTimeout(300);
   check('breathing session saved', (await count('paced-breathing')) === 1);
+
+  // daily loop: Today → check in → personalised suggestions → programme → skill → reflection → reminders
+  await go('#/today');
+  check('Today page renders the four daily steps', (await page.locator('.mini-steps li').count()) === 4);
+  check('a mood logged earlier today already counts as checked in', await page.isVisible('#today-checkin .badge:has-text("Done")'));
+  if (!(await page.isVisible('#ci-mood'))) await page.click('#today-checkin summary');
+  await page.fill('#ci-mood', '3');
+  await page.fill('#ci-anx', '8');
+  await page.fill('#ci-energy', '3');
+  await page.click('[data-focus="anxiety"]');
+  await page.fill('#ci-int', 'Walk at lunch');
+  await page.click('form[data-checkin] button[type=submit]');
+  await page.waitForTimeout(600);
+  const dailyCheckins = await page.evaluate(async () => (await import('./js/core/store.js')).store.query({ kind: 'mood' }).filter((r) => r.data.source === 'today').length);
+  check('daily check-in saved', dailyCheckins === 1);
+  check('focus moves to today’s practice after checking in', await page.evaluate(() => document.activeElement?.id === 'h-practice'));
+  const recTitles = await page.locator('#today-practice .rec-card h3').allTextContents();
+  const reasons = (await page.locator('#today-practice .rec-card').allTextContents()).join(' ');
+  check('suggestions respond to the check-in, each with a reason', recTitles.length >= 3 && /low mood|anxious|anxiety|energy/i.test(reasons), recTitles.join(' | '));
+  check('exercises already done today are not suggested again', !recTitles.some((t) => /paced breathing/i.test(t)));
+
+  await go('#/programs');
+  await page.click('[data-start="calm"]');
+  await page.waitForTimeout(700);
+  check('programme started and Today shows day 1', page.url().includes('#/today') && (await page.isVisible('#h-prog')) && (await page.evaluate(async () => (await (await import('./js/core/store.js')).store.kvGet('program'))?.id)) === 'calm');
+  await go('#/check-in/gad7');
+  for (let i = 0; i < 7; i++) await page.check(`input[name=q${i}][value="1"]`);
+  await page.click('form[data-q] button[type=submit]');
+  await page.waitForTimeout(400);
+  await go('#/today');
+  check('programme day 1 ticks itself off after the check-in', await page.isVisible('text=Calm: day 1 complete'));
+  check('day 2 waits for tomorrow, with the option to go on early', await page.isVisible('[data-early]'));
+
+  await page.click('[data-skill]');
+  await page.waitForTimeout(400);
+  check('skill of the day marked as learned', await page.isVisible('[data-skill][disabled]'));
+  await page.fill('#rf-rate', '7');
+  await page.fill('#rf-win', 'Asked a question in the meeting');
+  await page.fill('#rf-tom', 'Walk at 12:30');
+  await page.click('form[data-reflect] button[type=submit]');
+  await page.waitForTimeout(600);
+  check('evening reflection saved', (await page.evaluate(async () => (await import('./js/core/store.js')).store.query({ kind: 'daily' }).length)) === 1);
+  check('all four daily steps done', await page.isVisible('h1:has-text("all done today")'));
+  check('streak counts today', /1 day/.test(await page.locator('.today-top .stat').first().innerText()));
+  const [icsDl] = await Promise.all([page.waitForEvent('download'), page.click('[data-ics]')]);
+  const icsText = require('fs').readFileSync(await icsDl.path(), 'utf8');
+  check('daily reminders download as a repeating calendar event that links back', /RRULE:FREQ=DAILY/.test(icsText) && /#\/today/.test(icsText));
+  await go('#/');
+  check('home shows “Your day” for returning users', await page.isVisible('.today-card-home'));
+  await go('#/journal');
+  check('journal lists daily check-ins and reflections', (await page.isVisible('.entry-title:has-text("Daily check-in")')) && (await page.isVisible('.entry-title:has-text("Evening reflection")')));
 
   // report
   await go('#/reports');

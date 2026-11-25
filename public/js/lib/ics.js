@@ -23,6 +23,7 @@ export function buildICS(events, { calName = 'CBT Toolkit' } = {}) {
     lines.push('BEGIN:VEVENT', `UID:${Date.now().toString(36)}-${i}-${Math.random().toString(36).slice(2, 8)}@cbt-toolkit`, `DTSTAMP:${utcStamp()}`,
       `DTSTART:${floating(ev.start)}`, `DTEND:${floating(endLocal)}`, fold(`SUMMARY:${esc(ev.title)}`));
     if (ev.description) lines.push(fold(`DESCRIPTION:${esc(ev.description)}`));
+    if (ev.url) lines.push(fold(`URL:${ev.url}`));
     if (ev.rrule) lines.push(`RRULE:${ev.rrule}`);
     lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', fold(`DESCRIPTION:${esc(ev.title)}`), `TRIGGER:-PT${ev.alarm ?? 10}M`, 'END:VALARM', 'END:VEVENT');
   });

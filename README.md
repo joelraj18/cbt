@@ -14,17 +14,19 @@ A free, static web app that helps people work on seven areas of life with Cognit
 | **Sexual desire & intimacy** | Desire styles, brakes & accelerators, sensate focus, mindful body awareness, connection plan, intimacy thought record, desire diary, unwanted-urge trigger map |
 | **Impulsiveness** | Urge surfing (live urge-wave chart), STOP skill, chain analysis, pause rule, episodic future thinking, anger cool-down, HALT vulnerability check, pros & cons |
 
-**59 interactive exercises · 8 questionnaires (PHQ-9, GAD-7, WHO-5 + 5 area check-ins) · 188 research references** (168 DOI-verified against Crossref, 129 checked against PubMed abstracts).
+**59 interactive exercises · 8 guided programmes · 8 questionnaires (PHQ-9, GAD-7, WHO-5 + 5 area check-ins) · 188 research references** (168 DOI-verified against Crossref; key numbers in 153 checked against their PubMed or OpenAlex abstracts).
 
 ### Highlights
+- **A daily CBT routine.** The **Today** page (the app's start page) takes 10–15 minutes: a 30-second check-in, practice picked for you with the reason and the study behind it, a skill of the day, and an evening reflection. It tracks streaks and a weekly goal and welcomes you back after a gap ("never miss twice"). Daily reminders go to your own calendar, and the site installs as an app.
+- **Guided programmes.** A 28-day *CBT Foundations* programme and seven 14-day programmes (Mood Lift, Calm, Focus, Build Better Habits, Take Back Your Time, Desire & Connection, Urge Control). One lesson and one task a day; each day unlocks the next calendar day and ticks itself off when you finish the exercise. Each programme starts and ends with a check-in so you can see what changed.
 - **Plain language first.** Every area and exercise opens with "In simple words" and an everyday worked example; an interactive *thought → feeling → body → behaviour* cycle shows how problems keep going and how CBT breaks the loop. The research is one click deeper.
 - **Honest evidence labels.** Each exercise is graded A (strong) → D (practice-based) and links to the studies behind it, with sample sizes and effect sizes.
 - **Fully interactive.** Step-by-step wizards with autosaved drafts, timers, trackers, charts, printable blank worksheets, and calendar (.ics) reminders.
 - **Progress reports.** Reliable-change analysis of questionnaire scores (NHS Talking Therapies thresholds), mood trends, exercise insights linked to the research — generated live with every step timed. Print/PDF, HTML, JSON and CSV export.
-- **Transparent.** A "What's happening?" panel shows every operation and how long it took (boot ≈ 0.2 s, search ≈ 7 ms).
+- **Transparent.** A "What's happening?" panel shows every operation and how long it took (ready in ≈ 0.15 s, search ≈ 7 ms).
 - **Private.** No accounts, no analytics, no server storage. Data lives in the browser (IndexedDB), with optional AES-256 encrypted backups.
 - **Built-in search engine.** BM25F ranking, stemming, synonyms ("libido" → sexual desire), typo tolerance, phrase search, facets — entirely client-side.
-- **Works offline** (service worker) and is installable as an app. Light/dark themes, larger text option, keyboard shortcuts (Ctrl/⌘ K), WCAG-minded markup.
+- **Works offline** (service worker) and is installable as an app. Light/dark themes, larger text option, keyboard shortcuts (Ctrl/⌘ K). Tested with axe-core (0 WCAG 2.2 AA violations) and down to 320 px phone screens.
 - **Safety net.** "Get help now" on every page, crisis lines for many countries, a private safety plan, and an automatic crisis prompt if the PHQ-9 self-harm item is endorsed.
 - **AdSense-ready.** Reserved ad slots, a consent prompt, ad-free zones for sensitive pages, `ads.txt`, and an automatic CSP switch.
 
@@ -46,7 +48,7 @@ Open http://localhost:8788.
 npm test
 ```
 
-Runs 37 unit and content-integrity tests (search engine, scoring, reliable change, report engine, statistics, calendar export, encryption, and checks that every exercise, citation and form is complete).
+Runs 55 unit and content-integrity tests: search engine, scoring, reliable change, report engine, statistics, calendar export, encryption, backup-import sanitising, the daily coach (streaks, suggestions, programme pacing), and checks that every exercise, programme day, citation and form is complete.
 
 Optional browser test of the main user flows (needs Playwright):
 
@@ -99,7 +101,7 @@ After deploying, set `SITE.url` in `public/js/config.js` to your domain and run 
 
 ## Enable Google AdSense
 
-Ad space is already reserved (dashed "Ad space reserved" boxes) on content pages: home, area pages, research library, learn and search.
+Ad space is already reserved (dashed "Ad space reserved" boxes) on content pages only: home, area pages, research library, learn and search.
 
 1. Apply at [adsense.google.com](https://adsense.google.com) and wait for approval.
 2. In `public/js/config.js` set `ADS.client` to your publisher ID (`ca-pub-…`) and paste your ad-unit slot IDs into `ADS.slots` (`banner`, `inArticle`, `sidebar`, `footer`).
@@ -109,7 +111,7 @@ Ad space is already reserved (dashed "Ad space reserved" boxes) on content pages
 
 How ads behave:
 - Nothing loads until a publisher ID is set **and** the visitor clicks **Allow ads** in the consent prompt (choice stored locally; changeable in Settings).
-- **Ad-free zones** (configurable in `ADS.adFreeRoutes`): crisis help, exercises, toolbox, check-ins, journal, mood, plan, reports, settings, privacy. Sensitive pages never show ads.
+- **Ad-free zones** (configurable in `ADS.adFreeRoutes`): Today, programmes, crisis help, exercises, toolbox, check-ins, journal, mood, plan, reports, settings, privacy. Sensitive pages and daily practice never show ads.
 - Slots keep a fixed height, so pages don't jump when ads load. Set `ADS.showPlaceholders = false` to hide the empty boxes before approval.
 - The privacy policy page already includes Google's required third-party cookie disclosures.
 
@@ -129,14 +131,15 @@ public/                 ← the deployable site (Cloudflare Pages output directo
   js/app.js             boot sequence, header/nav, search palette, live activity panel
   js/config.js          site name + Google AdSense settings
   js/core/              router (hash), IndexedDB store, safe HTML templating, perf log, icons
-  js/lib/               search engine, stemmer, charts (SVG), stats, report engine, .ics, crypto, ads
+  js/lib/               search engine, stemmer, charts (SVG), stats, report engine, daily coach, .ics, crypto, backup sanitiser, install prompt, ads
   js/ui/                form/wizard engine, cycle diagram, shared components, 10 interactive widgets
-  js/views/             pages: home, areas, exercise, check-ins, mood, plan, journal, reports, research, search, toolbox, learn, help, settings…
-  js/data/              areas, 59 exercises, questionnaires, 188 research references, learning content, crisis lines
+  js/views/             pages: today, programmes, home, areas, exercise, check-ins, mood, plan, journal, reports, research, search, toolbox, learn, help, settings…
+  js/data/              areas, 59 exercises, 8 programmes, daily skills, questionnaires, 188 research references, learning content, crisis lines
   sw.js · manifest.webmanifest · _headers · ads.txt · robots.txt · sitemap.xml · icons/
 scripts/                dev server, build (sw precache, CSP, sitemap), citation verifier
 tests/                  node:test unit tests + optional Playwright e2e flows
 docs/REPORT.md          project report: plan, research method, evidence summary, QA results
+docs/AUDIT.md           site audit (accessibility, security, mobile, bugs, UX) and the daily-practice upgrade
 ```
 
 ## Credits & licences

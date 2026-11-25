@@ -26,6 +26,8 @@ export function overview(recs, now = new Date()) {
     entries: recs.length, exercises: ex.length,
     checkins: recs.filter((r) => r.kind === 'assessment').length,
     moods: recs.filter((r) => r.kind === 'mood').length,
+    reflections: recs.filter((r) => r.kind === 'daily').length,
+    checkinDays: new Set(recs.filter((r) => r.kind === 'mood').map((r) => dayKey(r.createdAt))).size,
     activeDays: st.activeDays, streak: st.current, longestStreak: st.longest,
     byArea, topExercises: Object.entries(byType).map(([id, count]) => ({ id, count, title: EXERCISE_BY_ID[id]?.title || id })).sort((a, b) => b.count - a.count).slice(0, 6),
     perDay: recs.reduce((m, r) => { const k = dayKey(r.createdAt); m[k] = (m[k] || 0) + 1; return m; }, {}),
@@ -139,6 +141,10 @@ export function insights({ ov, trends, mood, findings, days }) {
   if (mood && mood.prevAvg != null && mood.avg != null) {
     const d = round(mood.avg - mood.prevAvg, 1);
     out.push({ tone: d >= 0 ? 'good' : 'warn', text: `Your average mood was ${mood.avg}/10 in this period, ${d >= 0 ? 'up' : 'down'} ${Math.abs(d)} from the previous ${days} days.`, refs: [] });
+  }
+  if (days && ov.checkinDays >= 2) {
+    const rate = Math.round((ov.checkinDays / days) * 100);
+    out.push({ tone: rate >= 60 ? 'good' : 'info', text: `You checked in on ${ov.checkinDays} of the last ${days} days (${rate}%)${ov.reflections ? ` and wrote ${ov.reflections} evening reflection${ov.reflections === 1 ? '' : 's'}` : ''}. Regular self-monitoring is linked to reaching goals more often.`, refs: ['harkin2016'] });
   }
   if (ov.activeDays >= 3) {
     const perWeek = days ? round((ov.exercises / days) * 7, 1) : null;

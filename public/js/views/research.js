@@ -7,18 +7,19 @@ import { AREAS, AREA_BY_ID, areaColor } from '../data/areas.js';
 import { EXERCISES } from '../data/exercises/index.js';
 import { ASSESSMENTS } from '../data/assessments.js';
 import { EVIDENCE_POINTS } from '../data/learn.js';
-import { pageHead, refCard, refLinks, shortCite, fullCitation, isSynthesis, REF_BY_ID, areaChip, adSlot, areaStyle } from '../ui/components.js';
+import { pageHead, refCard, refLinks, shortCite, fullCitation, isSynthesis, REF_BY_ID, areaChip, adSlot, areaStyle, notFoundPage } from '../ui/components.js';
 import { getEngine } from '../lib/search-index.js';
 
 const TYPES = [['synthesis', 'Meta-analyses & reviews', isSynthesis], ['trial', 'Randomised trials', (r) => /random|trial|RCT/i.test(r.type) && !isSynthesis(r)], ['other', 'Other studies, theory & books', (r) => !isSynthesis(r) && !/random|trial|RCT/i.test(r.type)]];
 
 export async function researchListView({ query }) {
-  const withDoi = research.filter((r) => r.doi).length, withPm = research.filter((r) => r.pmid).length;
+  const withDoi = research.filter((r) => r.doi).length;
+  const viaPubMed = research.filter((r) => /PubMed abstract/.test(r.verified || '')).length, viaOpenAlex = research.filter((r) => /OpenAlex abstract/.test(r.verified || '')).length;
   const body = html`<div class="container">${pageHead({ title: 'Research library', lede: `The ${research.length} studies, reviews, guidelines and books behind every exercise — each with a plain-language summary and links to the original.` })}
     <div class="stats" style="margin-bottom:18px">
       <div class="stat"><div class="label">References</div><div class="value">${research.length}</div></div>
       <div class="stat"><div class="label">DOI-verified via Crossref</div><div class="value">${withDoi}</div></div>
-      <div class="stat"><div class="label">Checked against PubMed abstract</div><div class="value">${withPm}</div></div>
+      <div class="stat"><div class="label">Numbers checked against the abstract</div><div class="value">${viaPubMed + viaOpenAlex}</div><div class="delta faint">${viaPubMed} PubMed · ${viaOpenAlex} OpenAlex</div></div>
       <div class="stat"><div class="label">Meta-analyses & reviews</div><div class="value">${research.filter(isSynthesis).length}</div></div>
     </div>
     <div class="card flat" style="margin-bottom:16px">
@@ -28,6 +29,7 @@ export async function researchListView({ query }) {
         <select data-sort style="width:auto" aria-label="Sort"><option value="relevance">Sort: relevance / newest</option><option value="new">Newest first</option><option value="old">Oldest first</option><option value="az">Title A–Z</option></select>
         <span class="search-stats" data-stats style="margin:0"></span></div>
     </div>
+    <h2 class="sr-only">Research results</h2>
     <div data-list class="grid" style="--min:340px"></div>
     <div style="text-align:center;margin-top:16px"><button class="btn" data-more hidden>Show more</button></div>
     <section class="section"><h2>Why CBT? The big picture</h2><div class="grid" style="--min:300px">${EVIDENCE_POINTS.map((p) => html`<div class="card flat"><h3>${p.title}</h3><p class="small">${p.text}</p><p class="small" style="margin:0">${p.refs.map((r, i) => html`${i ? ' · ' : ''}<a href="#/research/${r}">${shortCite(REF_BY_ID[r])}</a>`)}</p></div>`)}</div></section>
@@ -65,7 +67,7 @@ export async function researchListView({ query }) {
 
 export async function researchDetailView({ params }) {
   const r = REF_BY_ID[params.id];
-  if (!r) return { title: 'Not found', body: html`<div class="container"><p>Reference not found. <a href="#/research">Research library</a></p></div>` };
+  if (!r) return notFoundPage('Reference', '#/research', 'Research library');
   const usedEx = EXERCISES.filter((e) => e.refs.includes(r.id));
   const usedAreas = AREAS.filter((a) => [...a.facts, ...a.myths].some((f) => f.ref === r.id) || a.definitionRef === r.id);
   const usedAs = ASSESSMENTS.filter((a) => a.refs.includes(r.id));

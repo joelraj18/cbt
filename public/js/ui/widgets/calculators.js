@@ -28,7 +28,7 @@ export function tmt(el, { ex, onSaved }) {
     const [top, second] = gains;
     out.innerHTML = String(html`<div class="split"><div><div class="small muted">Motivation score</div><div style="font-size:2rem;font-weight:700">${score}<span class="small muted"> / 100</span></div></div>
       <div class="small" style="max-width:420px">Motivation = (Expectancy × Value) ÷ (1 + Distractibility × Delay). ${score < 15 ? 'Very low — no wonder this task keeps slipping.' : score < 35 ? 'Low — expect to keep delaying unless something changes.' : score < 60 ? 'Moderate — a nudge on one lever should get you started.' : 'Good — start now while motivation is high.'}</div></div>
-      <h4 style="margin:12px 0 4px">Pull this lever first: ${LEVERS[top[0]].label.split(' — ')[0]} (+${top[1].toFixed(1)})</h4>
+      <h3 class="h4" style="margin:12px 0 4px">Pull this lever first: ${LEVERS[top[0]].label.split(' — ')[0]} (+${top[1].toFixed(1)})</h3>
       <ul class="small" style="margin-bottom:6px">${LEVERS[top[0]].fixes.map((f) => html`<li>${f}</li>`)}</ul>
       <p class="small" style="margin:0">Then: <strong>${LEVERS[second[0]].label.split(' — ')[0]}</strong> — try <a href="#/exercise/${LEVERS[second[0]].ex}">this exercise</a>. Open <a href="#/exercise/${LEVERS[top[0]].ex}">the matching exercise →</a></p>`);
     return { score, top: top[0] };

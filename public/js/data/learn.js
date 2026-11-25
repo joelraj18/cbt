@@ -157,7 +157,7 @@ export const FAQ = [
   { q: 'What if an exercise makes me feel worse?', a: 'Some exercises (like exposure) are meant to feel uncomfortable at first — that discomfort is part of learning. But if you feel overwhelmed, unsafe, or much worse for more than a few days, pause and speak to a professional. If you are in crisis, use Get help now.' },
   { q: 'Which area should I start with?', a: 'Start with whatever is causing you the most trouble. If you are not sure, take the wellbeing check-in and the depression and anxiety questionnaires — they will point you in a direction.' },
   { q: 'Can therapists use this with clients?', a: 'Yes. Every exercise can be printed as a blank worksheet, clients can share their own printed or exported progress reports, and every technique links to its research.' },
-  { q: 'Where does the research come from?', a: 'Each of the 186 references was matched against Crossref (the official DOI registry) and, where available, checked against its PubMed or OpenAlex abstract. The Research page shows the details and links to every paper.' },
+  { q: 'Where does the research come from?', a: 'From published studies, reviews, guidelines and books. Every reference with a DOI was matched against Crossref (the official DOI registry) and, where available, its key numbers were checked against the PubMed or OpenAlex abstract. Books and official guidelines link to their publisher. The Research page shows the details and links to every paper.' },
   { q: 'Why is there advertising?', a: 'Ads (if enabled by the site owner) keep the toolkit free. They only load if you agree, are never shown on crisis, exercise, journal, check-in or report pages, and your entries are never shared with anyone.' },
 ];
 

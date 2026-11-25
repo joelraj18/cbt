@@ -28,7 +28,7 @@ function svg(mode) {
   }).join('');
   const nodes = NODES.map((nd, i) => `<g class="node" data-node="${nd.k}" tabindex="0" role="button" aria-label="${nd.label}"><rect x="${pos[i][0] - bw / 2}" y="${pos[i][1] - bh / 2}" width="${bw}" height="${bh}" rx="12"/><text x="${pos[i][0]}" y="${pos[i][1] - 2}" text-anchor="middle">${nd.label}</text><text class="sub" x="${pos[i][0]}" y="${pos[i][1] + 14}" text-anchor="middle">${nd.sub}</text></g>`).join('');
   const center = `<g class="center"><rect x="${cx - 70}" y="${cy - 18}" width="140" height="36" rx="18"/><text x="${cx}" y="${cy + 5}" text-anchor="middle">${mode === 'better' ? 'Breaking the cycle' : 'The vicious cycle'}</text></g>`;
-  return `<svg class="cycle-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cycle diagram: situation, thoughts, feelings, body and behaviour all affect each other">${arrows}${nodes}${center}</svg>`;
+  return `<svg class="cycle-svg" viewBox="0 0 ${W} ${H}" role="group" aria-label="Cycle diagram: situation, thoughts, feelings, body and behaviour all affect each other. Select a part to highlight it.">${arrows}${nodes}${center}</svg>`;
 }
 
 function steps(c, mode) {

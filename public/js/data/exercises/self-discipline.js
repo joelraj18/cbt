@@ -1,4 +1,5 @@
 import { rate, pct, text, long, num, chips, radio, info, when, date, n, delta, short } from './_fields.js';
+import { html } from '../../core/dom.js';
 
 export default [
   {
@@ -101,7 +102,7 @@ export default [
     form: { fields: [
       text('should', 'A "should" activity you avoid', { required: true }),
       text('want', 'A "want" activity you love', { required: true }),
-      { id: 'rule', type: 'computed', label: 'Your bundle rule', compute: (d) => (d.should && d.want ? `I only get <strong>${esc(d.want)}</strong> while I’m <strong>${esc(d.should)}</strong>.` : 'Fill in both to see your rule.') },
+      { id: 'rule', type: 'computed', label: 'Your bundle rule', compute: (d) => (d.should && d.want ? html`I only get <strong>${d.want}</strong> while I’m <strong>${d.should}</strong>.` : 'Fill in both to see your rule.') },
       text('lock', 'How will you keep the treat "locked" to the task?'),
       num('times', 'Times you did the "should" activity this week', { min: 0, max: 50 }),
     ] },
@@ -129,7 +130,7 @@ export default [
       text('referee', 'Referee (who will check?)'),
       radio('checkins', 'Check-ins', ['Daily', 'Weekly', 'Every two weeks']),
       text('signature', 'Sign by typing your name', { required: true }),
-      { id: 'preview', type: 'computed', label: 'Your contract', compute: (d) => (d.goal ? `I, <strong>${esc(d.signature || '…')}</strong>, commit to <strong>${esc(d.goal)}</strong> by <strong>${esc(d.deadline || '…')}</strong>. ${d.stakes ? `If I don’t, ${esc(d.stakes)}.` : ''} ${d.referee ? `${esc(d.referee)} will check ${String(d.checkins || '').toLowerCase()}.` : ''}` : 'Fill in your goal to see the contract.') },
+      { id: 'preview', type: 'computed', label: 'Your contract', compute: (d) => (d.goal ? html`I, <strong>${d.signature || '…'}</strong>, commit to <strong>${d.goal}</strong> by <strong>${d.deadline || '…'}</strong>. ${d.stakes ? html`If I don’t, ${d.stakes}.` : ''} ${d.referee ? html`${d.referee} will check ${String(d.checkins || '').toLowerCase()}.` : ''}` : 'Fill in your goal to see the contract.') },
       radio('status', 'Later: how is it going?', ['On track', 'Behind', 'Completed', 'Missed']),
     ] },
     summarize: (d) => `${short(d.goal, 50)} by ${d.deadline || '–'} · ${d.status || 'active'}`,
@@ -163,4 +164,3 @@ export default [
   },
 ];
 
-function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }

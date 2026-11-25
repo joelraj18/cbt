@@ -1,5 +1,6 @@
 import { rate, pct, text, long, num, chips, radio, info, when, date, traps, emotions, n, delta, short, maxEmotion, sign, change } from './_fields.js';
 import { mean } from '../../lib/stats.js';
+import { html } from '../../core/dom.js';
 
 const CATEGORIES = ['Routine / chores', 'Work / study', 'Social', 'Physical / movement', 'Fun / hobby', 'Rest', 'Screen time', 'Avoiding / withdrawing'];
 
@@ -251,7 +252,7 @@ export default [
       rate('quality', 'Sleep quality', { minLabel: '0 = very poor', maxLabel: '10 = excellent' }),
       num('nap', 'Naps yesterday (minutes)', { min: 0, max: 300, default: 0 }),
       { id: 'habits', type: 'checklist', label: 'Yesterday…', options: ['Caffeine after 2pm', 'Alcohol in the evening', 'Phone or screens in bed', 'Got morning daylight', 'Exercised'] },
-      { id: 'calc', type: 'computed', label: 'Your night in numbers', compute: (d) => { const s = sleepCalc(d); return s ? `Time in bed ${s.tib.toFixed(1)} h · Sleep ${s.tst.toFixed(1)} h · Sleep efficiency <strong>${s.se}%</strong> ${s.se >= 85 ? '✓ healthy (85%+)' : '— CBT-I aims for 85%+'}` : 'Enter bed and get-up times to calculate.'; } },
+      { id: 'calc', type: 'computed', label: 'Your night in numbers', compute: (d) => { const s = sleepCalc(d); return s ? html`Time in bed ${s.tib.toFixed(1)} h · Sleep ${s.tst.toFixed(1)} h · Sleep efficiency <strong>${s.se}%</strong> ${s.se >= 85 ? '✓ healthy (85%+)' : '— CBT-I aims for 85%+'}` : 'Enter bed and get-up times to calculate.'; } },
     ] },
     summarize: (d) => { const s = sleepCalc(d); return s ? `${s.tst.toFixed(1)} h sleep · ${s.se}% efficiency · quality ${d.quality ?? '–'}/10` : 'Sleep diary'; },
     metrics: (d) => { const s = sleepCalc(d); return { efficiency: s?.se ?? null, hours: s ? Math.round(s.tst * 10) / 10 : null, quality: n(d.quality) }; },

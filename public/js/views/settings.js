@@ -4,6 +4,7 @@ import { store } from '../core/store.js';
 import { perf } from '../core/perf.js';
 import { fmtBytes, fmtNum, fmtMs, dayKey } from '../core/format.js';
 import { encryptJSON, decryptJSON } from '../lib/crypto.js';
+import { sanitizeBackup } from '../lib/sanitize.js';
 import { ads } from '../lib/ads.js';
 import { ADS, SITE } from '../config.js';
 import { pageHead } from '../ui/components.js';
@@ -67,9 +68,10 @@ export async function settingsView() {
             if (!pass) return;
             data = await decryptJSON(data, pass);
           }
-          const replace = await confirmDialog({ title: 'How should we restore?', body: `This backup has ${data.records?.length ?? 0} entries. "Replace" deletes what is on this device first; "Merge" keeps both.`, confirm: 'Replace', cancel: 'Merge' });
-          const res = await store.importAll(data, replace ? 'replace' : 'merge');
-          status(`Restored ${res.records} entries and ${res.kv} saved tools.`);
+          const { data: clean, report } = sanitizeBackup(data);
+          const replace = await confirmDialog({ title: 'How should we restore?', body: `This backup has ${report.kept} valid entries${report.dropped ? ` (${report.dropped} invalid entries will be skipped)` : ''}. "Replace" deletes what is on this device first; "Merge" keeps both.`, confirm: 'Replace', cancel: 'Merge' });
+          const res = await store.importAll(clean, replace ? 'replace' : 'merge');
+          status(`Restored ${res.records} entries and ${res.kv} saved tools${report.dropped ? `; skipped ${report.dropped} invalid entries` : ''}.`);
           toast('Backup restored.');
         } catch (err) { status(`Could not restore: ${err.message}`); toast('Restore failed.'); }
         input.value = '';

@@ -43,7 +43,7 @@ export async function planView() {
             <div class="progress" style="margin-top:6px"><span style="width:${Math.min(100, (d / it.perWeek) * 100)}%"></span></div></div>`; })}
           <div class="cluster" style="margin-top:16px"><label class="small" for="pl-time">Reminder time</label><input type="time" id="pl-time" value="${plan.time || '19:00'}" style="width:auto">
             <button class="btn soft" data-ics>${icon('calendar')} Add reminders to my calendar</button></div>`
-          : html`<div class="empty"><h3>No plan yet</h3><p>Pick one to three areas below and we'll suggest a starter plan based on the strongest evidence.</p></div>`}
+          : html`<div class="empty"><h2 class="h3">No plan yet</h2><p>Pick one to three areas below and we'll suggest a starter plan based on the strongest evidence.</p></div>`}
           <div class="field" style="margin-top:18px"><label class="label" for="pl-add">Add any exercise</label><div class="cluster"><select id="pl-add" style="flex:1 1 260px">${AREAS.map((a) => html`<optgroup label="${a.name}">${EXERCISES.filter((e) => e.area === a.id).map((e) => html`<option value="${e.id}">${e.title}</option>`)}</optgroup>`)}</select><button class="btn" data-add>${icon('plus')} Add</button></div></div>
         </section>
         <aside class="stack">
@@ -79,7 +79,7 @@ export async function planView() {
         const [h, m] = (plan.time || '19:00').split(':').map(Number);
         const start = new Date(startOfWeek(new Date())); start.setHours(h, m, 0, 0);
         const local = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-        const events = plan.items.map((it, i) => { const ex = EXERCISE_BY_ID[it.ex]; const s = new Date(start.getTime() + i * 20 * 60000); return { title: `CBT practice: ${ex.title}`, start: local(s), minutes: Math.max(10, ex.minutes), rrule: `FREQ=WEEKLY;BYDAY=${DAYSETS[it.perWeek].join(',')}`, description: `${ex.tagline}\nOpen CBT Toolkit → ${ex.title}` }; });
+        const events = plan.items.map((it, i) => { const ex = EXERCISE_BY_ID[it.ex]; const s = new Date(start.getTime() + i * 20 * 60000); return { title: `CBT practice: ${ex.title}`, start: local(s), minutes: Math.max(10, ex.minutes), rrule: `FREQ=WEEKLY;BYDAY=${(DAYSETS[it.perWeek] || DAYSETS[2]).join(',')}`, description: `${ex.tagline}\nOpen CBT Toolkit → ${ex.title}` }; });
         download('cbt-practice-plan.ics', buildICS(events, { calName: 'CBT practice plan' }), 'text/calendar');
         toast('Calendar file downloaded — open it to add weekly reminders.');
       }),

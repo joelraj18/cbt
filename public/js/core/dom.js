@@ -74,9 +74,10 @@ export function confirmDialog({ title, body, confirm = 'Confirm', cancel = 'Canc
   return new Promise((resolve) => {
     const d = document.createElement('dialog');
     d.innerHTML = String(html`<form method="dialog"><div class="dialog-body"><h3>${title}</h3><p class="muted">${body}</p></div>
-      <div class="dialog-foot"><button class="btn ghost" value="cancel">${cancel}</button>
+      <div class="dialog-foot"><button type="button" class="btn ghost" data-cancel>${cancel}</button>
       <button class="btn ${danger ? 'danger' : 'primary'}" value="ok">${confirm}</button></div></form>`);
     document.body.append(d);
+    d.querySelector('[data-cancel]').addEventListener('click', () => d.close('cancel'));
     d.addEventListener('close', () => { resolve(d.returnValue === 'ok'); d.remove(); });
     d.showModal();
   });
@@ -88,8 +89,9 @@ export function promptDialog({ title, body = '', label = '', type = 'text', conf
     const d = document.createElement('dialog');
     d.innerHTML = String(html`<form method="dialog"><div class="dialog-body"><h3>${title}</h3>${body ? html`<p class="muted">${body}</p>` : ''}
       <div class="field"><label for="dlg-input">${label}</label><input id="dlg-input" type="${type}" placeholder="${placeholder}" autocomplete="off"></div></div>
-      <div class="dialog-foot"><button class="btn ghost" value="cancel">Cancel</button><button class="btn primary" value="ok">${confirm}</button></div></form>`);
+      <div class="dialog-foot"><button type="button" class="btn ghost" data-cancel>Cancel</button><button class="btn primary" value="ok">${confirm}</button></div></form>`);
     document.body.append(d);
+    d.querySelector('[data-cancel]').addEventListener('click', () => d.close('cancel'));
     const input = d.querySelector('input');
     d.addEventListener('close', () => { resolve(d.returnValue === 'ok' ? input.value : null); d.remove(); });
     d.showModal();

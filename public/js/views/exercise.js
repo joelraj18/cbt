@@ -5,7 +5,7 @@ import { perf } from '../core/perf.js';
 import { fmtDateTime, relTime, fmtNum, fmtDuration } from '../core/format.js';
 import { AREA_BY_ID, LEVELS } from '../data/areas.js';
 import { EXERCISE_BY_ID, exercisesForArea } from '../data/exercises/index.js';
-import { areaStyle, levelBadge, pageHead, refCard, REF_BY_ID, areaChip, crisisCallout } from '../ui/components.js';
+import { areaStyle, levelBadge, pageHead, refCard, REF_BY_ID, areaChip, crisisCallout, notFoundPage } from '../ui/components.js';
 import { createForm, worksheetHTML, trackerSVG } from '../ui/forms.js';
 import { saveExercise, computeMetrics } from '../ui/save.js';
 import { lineChart, barChart } from '../lib/charts.js';
@@ -17,7 +17,7 @@ const TRAP_NAME = Object.fromEntries(THINKING_TRAPS.map((t) => [t.id, t.name]));
 
 export async function exerciseView({ params, query }) {
   const ex = EXERCISE_BY_ID[params.id];
-  if (!ex) return { title: 'Not found', body: html`<div class="container"><p>Exercise not found. <a href="#/areas">Browse areas</a></p></div>` };
+  if (!ex) return notFoundPage('Exercise', '#/areas', 'Browse areas');
   const area = AREA_BY_ID[ex.area];
   const entries = store.query({ type: ex.id });
   const tab = query.tab || (query.edit || entries.length || ex.tool || ex.widget ? 'do' : 'guide');
@@ -45,6 +45,8 @@ export async function exerciseView({ params, query }) {
       else if (k === 'guide') renderGuide(panel, ex, show);
       else if (k === 'science') renderScience(panel, ex);
       else if (k === 'history') cleanup.push(renderHistory(panel, ex, query.open, show));
+      const label = tabs.find(([key]) => key === k)?.[1] || '';
+      if (!panel.querySelector(':scope > h2:first-child')) panel.insertAdjacentHTML('afterbegin', `<h2 class="sr-only">${label}</h2>`);
     };
     show(tab);
     const offs = [
@@ -133,9 +135,10 @@ function showResult(el, ex, rec, show) {
   const count = store.query({ type: ex.id }).length;
   el.innerHTML = String(html`<div class="card" style="border-color:var(--good)">
     <div class="callout good"><div class="callout-title">${icon('check')} Saved — nice work.</div><p style="margin:0">That's entry #${count} for this exercise. It is stored only on this device.</p></div>
-    ${lines.length ? html`<ul class="ticks" style="margin-top:14px">${lines.map((l) => html`<li>${raw(l)}</li>`)}</ul>` : ''}
+    ${lines.length ? html`<ul class="ticks" style="margin-top:14px">${lines.map((l) => html`<li>${l}</li>`)}</ul>` : ''}
     <div class="cluster" style="margin-top:14px">
       ${events.length ? html`<button class="btn soft" data-ics>${icon('calendar')} Add to calendar (${events.length})</button>` : ''}
+      <a class="btn primary" href="#/today">${icon('sun')} Back to Today</a>
       <button class="btn" data-again>${icon('plus')} New entry</button>
       <button class="btn ghost" data-hist>${icon('chart')} See my history</button>
       <a class="btn ghost" href="#/reports">${icon('activity')} Progress report</a>

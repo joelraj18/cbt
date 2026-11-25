@@ -33,8 +33,10 @@ export function match(path) {
 }
 
 export const href = (path, query) => '#' + path + (query && Object.keys(query).length ? '?' + new URLSearchParams(query) : '');
-export function go(path, query, { replace = false } = {}) {
+let keepScrollOnce = false;
+export function go(path, query, { replace = false, keepScroll = false } = {}) {
   const h = href(path, query);
+  keepScrollOnce = keepScroll;
   if (replace) { history.replaceState(null, '', h); render(); } else if (location.hash === h) render(); else location.hash = h;
 }
 export const onRoute = (when, fn) => hooks[when].push(fn);
@@ -64,9 +66,11 @@ export async function render() {
   perf.counters.renders++;
   perf.event(`Rendered ${path}`, ms);
   hooks.after.forEach((fn) => fn(ctx, ms));
-  if (!ctx.query.keepScroll) window.scrollTo(0, 0);
+  if (!ctx.query.keepScroll && !keepScrollOnce) window.scrollTo(0, 0);
+  const keptScroll = keepScrollOnce;
+  keepScrollOnce = false;
   const h1 = outlet.querySelector('h1');
-  if (h1 && document.activeElement !== document.querySelector('.palette input')) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }
+  if (h1 && !keptScroll && document.activeElement !== document.querySelector('.palette input')) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }
 }
 
 export function startRouter() {

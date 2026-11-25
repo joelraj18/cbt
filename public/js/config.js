@@ -29,5 +29,5 @@ export const ADS = {
   },
   showPlaceholders: true,      // show labelled empty boxes while `client` is empty (so you can see the space)
   requireConsent: true,        // ask visitors before loading Google's ad script
-  adFreeRoutes: ['help', 'exercise', 'toolbox', 'check-in', 'journal', 'reports', 'mood', 'plan', 'settings', 'privacy'],
+  adFreeRoutes: ['today', 'programs', 'help', 'exercise', 'toolbox', 'check-in', 'journal', 'reports', 'mood', 'plan', 'settings', 'privacy'],
 };

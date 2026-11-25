@@ -29,9 +29,12 @@ import { learnView } from './views/learn.js';
 import { helpView } from './views/help.js';
 import { settingsView } from './views/settings.js';
 import { privacyView, aboutView, notFoundView } from './views/pages.js';
+import { todayView } from './views/today.js';
+import { programsView, programDetailView } from './views/programs.js';
+import { initInstall } from './lib/install.js';
 
 const NAV = [
-  ['#/areas', 'Areas', 'areas'], ['#/toolbox', 'Toolbox', 'toolbox'], ['#/check-in', 'Check-in', 'check-in'],
+  ['#/today', 'Today', 'today'], ['#/areas', 'Areas', 'areas'], ['#/toolbox', 'Toolbox', 'toolbox'], ['#/check-in', 'Check-in', 'check-in'],
   ['#/journal', 'Journal', 'journal'], ['#/reports', 'Reports', 'reports'], ['#/research', 'Research', 'research'], ['#/learn', 'Learn CBT', 'learn'],
 ];
 
@@ -55,7 +58,8 @@ function renderDrawer() {
     <div class="split"><strong>Menu</strong><button class="icon-btn" data-close-menu aria-label="Close menu">${icon('x')}</button></div>
     <nav aria-label="Mobile">
       <a href="#/">${icon('home')} Home</a>
-      ${NAV.map(([h, l, s]) => html`<a href="${h}" data-nav="${s}">${icon({ areas: 'map', toolbox: 'tool', 'check-in': 'clipboard', journal: 'notebook', reports: 'chart', research: 'flask', learn: 'book' }[s])} ${l}</a>`)}
+      ${NAV.map(([h, l, s]) => html`<a href="${h}" data-nav="${s}">${icon({ today: 'sun', areas: 'map', toolbox: 'tool', 'check-in': 'clipboard', journal: 'notebook', reports: 'chart', research: 'flask', learn: 'book' }[s])} ${l}</a>`)}
+      <a href="#/programs">${icon('flag')} Programmes</a>
       <a href="#/mood">${icon('smile')} Mood log</a><a href="#/plan">${icon('calendar')} My plan</a><a href="#/settings">${icon('gear')} Settings & backup</a>
       <div class="group-label">Areas</div>
       ${AREAS.map((a) => html`<a href="#/area/${a.id}" style="--area:${areaColor(a.id)}"><span class="area-dot"></span> ${a.name}</a>`)}
@@ -75,9 +79,9 @@ function renderFooter() {
       <div><a class="brand" href="#/">${raw(LOGO)}<span>${SITE.name}</span></a>
         <p style="margin-top:10px">Free, private CBT exercises explained in plain language and backed by ${research.length} verified research papers. Everything you enter stays in this browser.</p>
         <p class="small faint">An educational self-help resource, not a diagnosis or a substitute for professional care. In an emergency call your local emergency number.</p></div>
-      <div><h4>Areas</h4><ul>${AREAS.map((a) => html`<li><a href="#/area/${a.id}">${a.name}</a></li>`)}</ul></div>
-      <div><h4>Your tools</h4><ul><li><a href="#/check-in">Check-ins</a></li><li><a href="#/mood">Mood log</a></li><li><a href="#/plan">My plan</a></li><li><a href="#/journal">Journal</a></li><li><a href="#/reports">Reports</a></li><li><a href="#/toolbox">Toolbox</a></li></ul></div>
-      <div><h4>About</h4><ul><li><a href="#/learn">What is CBT?</a></li><li><a href="#/research">Research library</a></li><li><a href="#/about">Methodology</a></li><li><a href="#/privacy">Privacy</a></li><li><a href="#/settings">Settings & backup</a></li><li><a href="#/help">Get help now</a></li></ul></div>
+      <div><h2 class="foot-h">Areas</h2><ul>${AREAS.map((a) => html`<li><a href="#/area/${a.id}">${a.name}</a></li>`)}</ul></div>
+      <div><h2 class="foot-h">Your tools</h2><ul><li><a href="#/today">Today</a></li><li><a href="#/programs">Programmes</a></li><li><a href="#/check-in">Check-ins</a></li><li><a href="#/mood">Mood log</a></li><li><a href="#/plan">My plan</a></li><li><a href="#/journal">Journal</a></li><li><a href="#/reports">Reports</a></li><li><a href="#/toolbox">Toolbox</a></li></ul></div>
+      <div><h2 class="foot-h">About</h2><ul><li><a href="#/learn">What is CBT?</a></li><li><a href="#/research">Research library</a></li><li><a href="#/about">Methodology</a></li><li><a href="#/privacy">Privacy</a></li><li><a href="#/settings">Settings & backup</a></li><li><a href="#/help">Get help now</a></li></ul></div>
     </div>
     <div class="perf-line" aria-live="polite"><span data-perf="ready">Loading…</span><span data-perf="index"></span><span data-perf="local"></span><span>${icon('lock', 'icon')} 0 bytes of your data sent to any server</span><button type="button" data-open-live>What's happening? ${icon('pulse', 'icon')}</button></div>
   </div>`);
@@ -176,6 +180,9 @@ function cycleTheme() {
 /* ---------------- routes ---------------- */
 function registerRoutes() {
   route('/', homeView, { section: 'home' });
+  route('/today', todayView, { section: 'today' });
+  route('/programs', programsView, { section: 'programs' });
+  route('/programs/:id', programDetailView, { section: 'programs' });
   route('/areas', areasView, { section: 'areas' });
   route('/area/:id', areaView, { section: 'area' });
   route('/exercise/:id', exerciseView, { section: 'exercise' });
@@ -207,6 +214,7 @@ function registerRoutes() {
 async function boot() {
   const bootStart = window.__bootStart ?? 0;
   perf.event('Downloaded & parsed app code', perf.now() - bootStart, `${EXERCISES.length} exercises · ${research.length} papers · ${ASSESSMENTS.length} questionnaires · ${AREAS.length} areas`);
+  initInstall();
   renderHeader(); renderFooter(); renderDrawer(); renderLivePanel();
   const msg = $('#boot-msg');
   if (msg) msg.textContent = 'Opening your private local database…';

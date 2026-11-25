@@ -112,8 +112,13 @@ export function statTile(label, value, sub = '') {
   return html`<div class="stat"><div class="label">${label}</div><div class="value">${value}</div>${sub ? html`<div class="delta">${sub}</div>` : ''}</div>`;
 }
 
+/** A "not found" page for unknown ids, with a proper h1 so focus and screen readers land somewhere useful. */
+export function notFoundPage(what, href, label) {
+  return { title: `${what} not found`, body: html`<div class="container narrow"><div class="empty"><h1>${what} not found</h1><p>That link may be out of date. Try searching, or go back to the list.</p><div class="cluster" style="justify-content:center"><a class="btn primary" href="${href}">${label}</a><button class="btn" data-open-search>${icon('search')} Search</button></div></div></div>` };
+}
+
 export function emptyState(title, body, cta) {
-  return html`<div class="empty"><h3>${title}</h3><p>${body}</p>${cta || ''}</div>`;
+  return html`<div class="empty"><h2 class="h3">${title}</h2><p>${body}</p>${cta || ''}</div>`;
 }
 
 /** Segments [{t, m}] from the search engine → highlighted HTML. */

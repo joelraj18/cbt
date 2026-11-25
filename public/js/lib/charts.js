@@ -87,7 +87,7 @@ export function lineChart(container, opts) {
     const iw = Math.max(60, W - m.l - m.r), ih = H - m.t - m.b;
     const x = (t) => m.l + ((t - tMin) / (tMax - tMin)) * iw;
     const y = (v) => m.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': opts.caption || 'Line chart' });
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'group', 'aria-label': opts.caption || 'Line chart' });
     // bands (severity ranges)
     (opts.bands || []).forEach((b) => {
       const y1 = y(Math.min(b.to, yMax)), y2 = y(Math.max(b.from, yMin));
@@ -115,7 +115,7 @@ export function lineChart(container, opts) {
     });
     // crosshair + tooltip layer
     const cross = el('line', { y1: m.t, y2: m.t + ih, class: 'crosshair', visibility: 'hidden' }, svg);
-    const overlay = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent', tabindex: 0, 'aria-label': 'Chart values: use arrow keys' }, svg);
+    const overlay = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent', tabindex: 0, role: 'button', 'aria-label': 'Explore chart values with the left and right arrow keys' }, svg);
     let idx = xsUnique.length - 1;
     const show = (i) => {
       idx = Math.max(0, Math.min(xsUnique.length - 1, i));
@@ -181,7 +181,7 @@ export function barChart(container, opts) {
       const labelW = Math.min(180, Math.max(90, W * 0.32));
       const rowH = 34, H = items.length * rowH + 8;
       const iw = W - labelW - 56;
-      svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': opts.caption || 'Bar chart' });
+      svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'group', 'aria-label': opts.caption || 'Bar chart' });
       el('line', { x1: labelW, x2: labelW, y1: 0, y2: H, class: 'axis-line' }, svg);
       items.forEach((it, i) => {
         const yy = i * rowH + 6, bh = Math.min(22, rowH - 10), bw = Math.max(it.value ? 3 : 0, (it.value / max) * iw);
@@ -189,7 +189,7 @@ export function barChart(container, opts) {
         lab.textContent = it.label.length > 26 ? it.label.slice(0, 25) + '…' : it.label;
         const r = Math.min(4, bw / 2);
         const path = `M${labelW},${yy}h${Math.max(0, bw - r)}a${r},${r} 0 0 1 ${r},${r}v${bh - 2 * r}a${r},${r} 0 0 1 -${r},${r}h-${Math.max(0, bw - r)}z`;
-        const bar = el('path', { d: path, fill: it.color || 'var(--s1)', class: 'bar', tabindex: 0, 'aria-label': `${it.label}: ${fmt(it.value)}` }, svg);
+        const bar = el('path', { d: path, fill: it.color || 'var(--s1)', class: 'bar', tabindex: 0, role: 'img', 'aria-label': `${it.label}: ${fmt(it.value)}` }, svg);
         const v = el('text', { x: labelW + bw + 6, y: yy + bh / 2 + 4, class: 'value-label' }, svg); v.textContent = fmt(it.value);
         const hit = () => showTip(it, labelW + bw / 2, yy);
         bar.addEventListener('pointerenter', hit); bar.addEventListener('focus', hit);
@@ -198,7 +198,7 @@ export function barChart(container, opts) {
     } else {
       const H = opts.height || 200, m = { t: 14, r: 8, b: 26, l: 34 };
       const iw = W - m.l - m.r, ih = H - m.t - m.b;
-      svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': opts.caption || 'Column chart' });
+      svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'group', 'aria-label': opts.caption || 'Column chart' });
       niceTicks(0, max, 4).forEach((v) => {
         const yy = m.t + ih - (v / max) * ih;
         el('line', { x1: m.l, x2: m.l + iw, y1: yy, y2: yy, class: v === 0 ? 'axis-line' : 'grid-line' }, svg);
@@ -211,7 +211,7 @@ export function barChart(container, opts) {
         const y0 = m.t + ih;
         if (bhh > 0) {
           const d = `M${cx - bw / 2},${y0}v-${Math.max(0, bhh - r)}a${r},${r} 0 0 1 ${r},-${r}h${bw - 2 * r}a${r},${r} 0 0 1 ${r},${r}v${Math.max(0, bhh - r)}z`;
-          const bar = el('path', { d, fill: it.color || 'var(--s1)', class: 'bar', tabindex: 0, 'aria-label': `${it.label}: ${fmt(it.value)}` }, svg);
+          const bar = el('path', { d, fill: it.color || 'var(--s1)', class: 'bar', tabindex: 0, role: 'img', 'aria-label': `${it.label}: ${fmt(it.value)}` }, svg);
           const hit = () => showTip(it, cx, y0 - bhh);
           bar.addEventListener('pointerenter', hit); bar.addEventListener('focus', hit);
           bar.addEventListener('pointerleave', () => { tip.hidden = true; }); bar.addEventListener('blur', () => { tip.hidden = true; });

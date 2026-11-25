@@ -17,7 +17,11 @@ export function describeRecord(r) {
   }
   if (r.kind === 'mood') {
     const d = r.data || {};
-    return { title: 'Mood log', type: 'Mood', summary: `Mood ${d.mood ?? '–'}/10 · anxiety ${d.anxiety ?? '–'}/10 · energy ${d.energy ?? '–'}/10${d.note ? ' · ' + String(d.note).slice(0, 60) : ''}`, url: '#/mood', area: null };
+    return { title: d.source === 'today' ? 'Daily check-in' : 'Mood log', type: 'Mood', summary: `Mood ${d.mood ?? '–'}/10 · anxiety ${d.anxiety ?? '–'}/10 · energy ${d.energy ?? '–'}/10${d.intention ? ' · intention: ' + String(d.intention).slice(0, 60) : ''}${d.note ? ' · ' + String(d.note).slice(0, 60) : ''}`, url: d.source === 'today' ? '#/today' : '#/mood', area: null };
+  }
+  if (r.kind === 'daily') {
+    const d = r.data || {};
+    return { title: 'Evening reflection', type: 'Daily', summary: [d.rating != null ? `Day ${d.rating}/10` : '', d.win ? `Win: ${d.win}` : '', d.tomorrow ? `Tomorrow: ${d.tomorrow}` : ''].filter(Boolean).join(' · '), url: '#/today', area: null };
   }
   return { title: r.type, type: r.kind, summary: '', url: '#/journal', area: r.area };
 }
