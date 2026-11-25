@@ -2,6 +2,7 @@
 import { EXERCISE_BY_ID } from '../data/exercises/index.js';
 import { ASSESSMENT_BY_ID, scoreAssessment } from '../data/assessments.js';
 import { fmtNum } from '../core/format.js';
+import { COURSE_BY_ID } from '../data/courses.js';
 
 export function describeRecord(r) {
   if (r.kind === 'exercise' || r.kind === 'session') {
@@ -22,6 +23,11 @@ export function describeRecord(r) {
   if (r.kind === 'daily') {
     const d = r.data || {};
     return { title: 'Evening reflection', type: 'Daily', summary: [d.rating != null ? `Day ${d.rating}/10` : '', d.win ? `Win: ${d.win}` : '', d.tomorrow ? `Tomorrow: ${d.tomorrow}` : ''].filter(Boolean).join(' · '), url: '#/today', area: null };
+  }
+  if (r.kind === 'course') {
+    const d = r.data || {};
+    const c = COURSE_BY_ID[d.course];
+    return { title: `CBT course · Session ${d.n ?? '?'}: ${d.title || ''}`.trim(), type: 'Course', summary: [c ? c.name : '', d.takeaway ? `Takeaway: ${String(d.takeaway).slice(0, 120)}` : d.problem ? String(d.problem).slice(0, 120) : '', d.helpful != null ? `helpful ${d.helpful}/10` : ''].filter(Boolean).join(' · '), url: `#/course/session/${d.n ?? ''}`, area: c?.area || r.area };
   }
   return { title: r.type, type: r.kind, summary: '', url: '#/journal', area: r.area };
 }

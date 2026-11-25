@@ -162,6 +162,59 @@ const check = (name, ok, detail = '') => { results.push([name, ok]); console.log
   await go('#/journal');
   check('journal lists daily check-ins and reflections', (await page.isVisible('.entry-title:has-text("Daily check-in")')) && (await page.isVisible('.entry-title:has-text("Evening reflection")')));
 
+  // CBT course: assessment → CBT map and goals → first skill session → clinician summary
+  const answerRadios = (val) => page.evaluate((val) => {
+    const g = new Map();
+    document.querySelectorAll('.wizard-body input[type=radio][data-fid]').forEach((r) => { if (!r.closest('[hidden]')) { if (!g.has(r.dataset.fid)) g.set(r.dataset.fid, []); g.get(r.dataset.fid).push(r); } });
+    for (const [fid, rs] of g) if (!rs.some((r) => r.checked)) (rs.find((r) => r.value === (fid === 'phq9_8' || fid === 'safety' ? '0' : /_\d+$/.test(fid) ? val : rs[0].value)) || rs[0]).click();
+  }, val);
+  const next = async () => { await page.click('[data-next]'); await page.waitForTimeout(120); };
+  await go('#/course');
+  check('course chooser offers 7 eight-session courses', (await page.locator('[data-start-course]').count()) === 7);
+  await page.click('[data-start-course="depression"]');
+  await page.waitForTimeout(800);
+  await page.fill('textarea[data-fid="problem"]', 'Low for months, stopped seeing friends');
+  await page.check('input[data-fid="duration"][value="6–12 months"]');
+  await next();
+  for (let i = 0; i < 3; i++) { await answerRadios('1'); await next(); }
+  await next();
+  await page.check('input[data-fid="supporter"][value="gp"]');
+  await next();
+  check('session 1 recommends a level of support (stepped care)', /Self-guided CBT is a good fit|support/i.test(await page.locator('.wizard-body .callout').first().innerText()));
+  await next();
+  await page.fill('textarea[data-fid="takeaway"]', 'I know where I am starting from');
+  await page.click('[data-save]'); await page.waitForTimeout(800);
+  check('session 1 saved with questionnaire scores', page.url().includes('done=1') && (await count('phq9')) >= 2);
+  await page.click('[data-early]'); await page.waitForTimeout(600);
+  await answerRadios('1'); await next();
+  await page.fill('textarea[data-fid="situation"]', 'Sunday evening at home');
+  await page.fill('textarea[data-fid="thought"]', 'I am failing');
+  await page.fill('textarea[data-fid="behaviour"]', 'Stayed in bed');
+  await next();
+  await page.check('input[data-check="maintainers"][value="withdrawal"]');
+  await next(); await next(); await next();
+  await page.fill('[data-list="goals"][data-row="0"][data-sub="text"]', 'See a friend once a week');
+  await next();
+  check('session 2 builds a personal CBT map', await page.isVisible('.map-box:has-text("I am failing")'));
+  await next();
+  await page.fill('textarea[data-fid="takeaway"]', 'Withdrawing keeps it going');
+  await page.click('[data-save]'); await page.waitForTimeout(800);
+  await page.click('[data-early]'); await page.waitForTimeout(600);
+  await answerRadios('1'); await next(); await next(); await next(); await next();
+  await page.check('input[data-fid="practised"]'); await next();
+  check('session 3 pre-fills the evidence-based practice plan', (await page.locator('[data-list="homework"][data-sub="ex"]').count()) >= 1);
+  await page.fill('textarea[data-fid="when"]', 'If it is 7pm, then I plan tomorrow');
+  await next();
+  await page.fill('textarea[data-fid="takeaway"]', 'Act first, feel better after');
+  await page.click('[data-save]'); await page.waitForTimeout(800);
+  const course = await page.evaluate(async () => (await (await import('./js/core/store.js')).store.kvGet('course')));
+  check('course progress, goals and practice plan saved', Object.keys(course.sessions).length === 3 && course.goals.length === 1 && course.homework.length >= 1);
+  await go('#/course/summary');
+  const summary = await page.locator('main').innerText();
+  check('clinician summary shows measures, map, goals and sessions', ['Measures', 'CBT map', 'Goals', 'Sessions'].every((h) => summary.includes(h)));
+  await go('#/today');
+  check('Today shows the CBT course', await page.isVisible('#h-course'));
+
   // report
   await go('#/reports');
   await page.waitForTimeout(2000);

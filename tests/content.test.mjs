@@ -7,6 +7,11 @@ import { research } from '../public/js/data/research.js';
 import { ASSESSMENTS } from '../public/js/data/assessments.js';
 import { EVIDENCE_POINTS, THINKING_TRAPS, TRAP_QUIZ, GLOSSARY, CBT_GUIDE } from '../public/js/data/learn.js';
 import { CRISIS_LINES } from '../public/js/data/resources.js';
+import { COURSE_REFS } from '../public/js/data/courses.js';
+import { readFileSync } from 'node:fs';
+
+/** Research ids cited in a source file via cite('id') or refs: ['id', …]. */
+const citedIn = (file) => { const src = readFileSync(new URL(file, import.meta.url), 'utf8'); return [...src.matchAll(/cite\('([^']+)'\)/g)].map((m) => m[1]).concat([...src.matchAll(/refs:\s*\[([^\]]*)\]/g)].flatMap((m) => [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]))).concat([...src.matchAll(/\[('[a-z0-9-]+'(?:,\s*'[a-z0-9-]+')+)\]\.filter\(\(id\) => REF_BY_ID/g)].flatMap((m) => [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]))); };
 
 const REF = new Set(research.map((r) => r.id));
 const FIELD_TYPES = new Set(['text', 'textarea', 'number', 'slider', 'select', 'radio', 'chips', 'checklist', 'checkbox', 'date', 'time', 'datetime-local', 'list', 'emotions', 'info', 'computed', 'tracker']);
@@ -71,7 +76,8 @@ test('research library: every reference is complete and verified', () => {
 });
 
 test('every reference in the library is actually used somewhere', () => {
-  const cited = new Set([...EXERCISES.flatMap((e) => e.refs), ...AREAS.flatMap((a) => [...a.facts, ...a.myths].map((f) => f.ref).concat(a.definitionRef || [])), ...ASSESSMENTS.flatMap((s) => s.refs), ...EVIDENCE_POINTS.flatMap((p) => p.refs), 'stanley2012', 'stanley2018']);
+  const cited = new Set([...EXERCISES.flatMap((e) => e.refs), ...AREAS.flatMap((a) => [...a.facts, ...a.myths].map((f) => f.ref).concat(a.definitionRef || [])), ...ASSESSMENTS.flatMap((s) => s.refs), ...EVIDENCE_POINTS.flatMap((p) => p.refs), 'stanley2012', 'stanley2018',
+    ...COURSE_REFS, ...['../public/js/lib/therapy.js', '../public/js/views/course.js', '../public/js/views/standards.js'].flatMap(citedIn)]);
   const unused = research.filter((r) => !cited.has(r.id)).map((r) => r.id);
   assert.deepEqual(unused, []);
 });

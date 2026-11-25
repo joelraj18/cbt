@@ -14,9 +14,17 @@ A free, static web app that helps people work on seven areas of life with Cognit
 | **Sexual desire & intimacy** | Desire styles, brakes & accelerators, sensate focus, mindful body awareness, connection plan, intimacy thought record, desire diary, unwanted-urge trigger map |
 | **Impulsiveness** | Urge surfing (live urge-wave chart), STOP skill, chain analysis, pause rule, episodic future thinking, anger cool-down, HALT vulnerability check, pros & cons |
 
-**59 interactive exercises · 8 guided programmes · 8 questionnaires (PHQ-9, GAD-7, WHO-5 + 5 area check-ins) · 188 research references** (168 DOI-verified against Crossref; key numbers in 153 checked against their PubMed or OpenAlex abstracts).
+**7 eight-session CBT courses · 59 interactive exercises · 8 guided programmes · 9 questionnaires (PHQ-9, GAD-7, WHO-5, a life impact check and 5 area check-ins) · 205 research references** (182 DOI-verified against Crossref; key numbers in 167 checked against their PubMed or OpenAlex abstracts).
 
 ### Highlights
+- **A CBT course structured the way psychologists deliver it.** Each of the 7 courses runs to 8 weekly sessions:
+  1. An assessment with standard questionnaires, a safety and suitability screen, and a recommended level of support based on NICE stepped care.
+  2. A personal **CBT map** (case formulation) and measurable goals.
+  3. Five skill sessions from the evidence-based treatment for that problem, with practice set and reviewed each week.
+  4. A **staying-well plan** with check-ups at 1, 3 and 6 months.
+
+  Every session follows the elements psychologists rate in CBT sessions (Cognitive Therapy Scale–Revised). Scores are tracked with NHS Talking Therapies reliable-change rules, and "not on track" alerts suggest stepping up to a professional. A printable **clinician summary** can be shared with a doctor or therapist.
+- **Honest clinical standards.** The `#/standards` page maps the course to the CBT competence framework, NICE, NHS Talking Therapies and APA guidance, rates its own coverage (including its limits), and shows the independent-review status. It never claims endorsement. Psychologists can review it with [`docs/CLINICAL-REVIEW.md`](docs/CLINICAL-REVIEW.md).
 - **A daily CBT routine.** The **Today** page (the app's start page) takes 10–15 minutes: a 30-second check-in, practice picked for you with the reason and the study behind it, a skill of the day, and an evening reflection. It tracks streaks and a weekly goal and welcomes you back after a gap ("never miss twice"). Daily reminders go to your own calendar, and the site installs as an app.
 - **Guided programmes.** A 28-day *CBT Foundations* programme and seven 14-day programmes (Mood Lift, Calm, Focus, Build Better Habits, Take Back Your Time, Desire & Connection, Urge Control). One lesson and one task a day; each day unlocks the next calendar day and ticks itself off when you finish the exercise. Each programme starts and ends with a check-in so you can see what changed.
 - **Plain language first.** Every area and exercise opens with "In simple words" and an everyday worked example; an interactive *thought → feeling → body → behaviour* cycle shows how problems keep going and how CBT breaks the loop. The research is one click deeper.
@@ -48,7 +56,13 @@ Open http://localhost:8788.
 npm test
 ```
 
-Runs 55 unit and content-integrity tests: search engine, scoring, reliable change, report engine, statistics, calendar export, encryption, backup-import sanitising, the daily coach (streaks, suggestions, programme pacing), and checks that every exercise, programme day, citation and form is complete.
+Runs 65 unit and content-integrity tests covering:
+
+- the search engine, scoring, reliable change and the report engine;
+- statistics, calendar export, encryption and backup-import sanitising;
+- the daily coach (streaks, suggestions, programme pacing);
+- the CBT course engine (stepped-care triage, session plans and measures, pacing, practice tracking, outcomes, safety and not-on-track alerts);
+- checks that every exercise, course session, programme day, citation and form is complete.
 
 Optional browser test of the main user flows (needs Playwright):
 
@@ -111,7 +125,7 @@ Ad space is already reserved (dashed "Ad space reserved" boxes) on content pages
 
 How ads behave:
 - Nothing loads until a publisher ID is set **and** the visitor clicks **Allow ads** in the consent prompt (choice stored locally; changeable in Settings).
-- **Ad-free zones** (configurable in `ADS.adFreeRoutes`): Today, programmes, crisis help, exercises, toolbox, check-ins, journal, mood, plan, reports, settings, privacy. Sensitive pages and daily practice never show ads.
+- **Ad-free zones** (configurable in `ADS.adFreeRoutes`): Today, the CBT course, clinical standards, programmes, crisis help, exercises, toolbox, check-ins, journal, mood, plan, reports, settings, privacy. Sensitive pages and practice never show ads.
 - Slots keep a fixed height, so pages don't jump when ads load. Set `ADS.showPlaceholders = false` to hide the empty boxes before approval.
 - The privacy policy page already includes Google's required third-party cookie disclosures.
 
@@ -120,6 +134,7 @@ How ads behave:
 ## Customise
 - **Name and branding:** `SITE` in `public/js/config.js`, plus the `<title>`/meta tags in `public/index.html`. Colours are CSS tokens at the top of `public/css/app.css` (light and dark).
 - **Crisis lines:** `public/js/data/resources.js` — put your country first.
+- **Clinical review:** once a psychologist has reviewed the site with `docs/CLINICAL-REVIEW.md` and agreed in writing to be named, add them to `CLINICAL_REVIEW` in `public/js/config.js`. Never list anyone without consent.
 - **Add an exercise:** add an object to the right file in `public/js/data/exercises/` (title, plain-language `simple`, `why`, `steps`, `example`, `tips`, evidence `level`, `refs`, and a `form` schema). `npm test` checks it is complete and that every reference exists.
 - **Add research:** add an entry to `public/js/data/research.js` (include the DOI), then run `npm run verify-citations`.
 
@@ -131,15 +146,16 @@ public/                 ← the deployable site (Cloudflare Pages output directo
   js/app.js             boot sequence, header/nav, search palette, live activity panel
   js/config.js          site name + Google AdSense settings
   js/core/              router (hash), IndexedDB store, safe HTML templating, perf log, icons
-  js/lib/               search engine, stemmer, charts (SVG), stats, report engine, daily coach, .ics, crypto, backup sanitiser, install prompt, ads
+  js/lib/               search engine, stemmer, charts (SVG), stats, report engine, daily coach, CBT course engine (therapy.js), .ics, crypto, backup sanitiser, install prompt, ads
   js/ui/                form/wizard engine, cycle diagram, shared components, 10 interactive widgets
-  js/views/             pages: today, programmes, home, areas, exercise, check-ins, mood, plan, journal, reports, research, search, toolbox, learn, help, settings…
-  js/data/              areas, 59 exercises, 8 programmes, daily skills, questionnaires, 188 research references, learning content, crisis lines
+  js/views/             pages: today, CBT course (hub, sessions, notes, clinician summary), clinical standards, programmes, home, areas, exercise, check-ins, mood, plan, journal, reports, research, search, toolbox, learn, help, settings…
+  js/data/              areas, 7 CBT courses, 59 exercises, 8 programmes, daily skills, questionnaires, 205 research references, learning content, crisis lines
   sw.js · manifest.webmanifest · _headers · ads.txt · robots.txt · sitemap.xml · icons/
 scripts/                dev server, build (sw precache, CSP, sitemap), citation verifier
 tests/                  node:test unit tests + optional Playwright e2e flows
 docs/REPORT.md          project report: plan, research method, evidence summary, QA results
 docs/AUDIT.md           site audit (accessibility, security, mobile, bugs, UX) and the daily-practice upgrade
+docs/CLINICAL-REVIEW.md review kit and sign-off form for psychologists
 ```
 
 ## Credits & licences

@@ -51,6 +51,7 @@ export async function aboutView() {
           <li><strong>Plain language first.</strong> Every area and exercise starts with "In simple words" and an everyday example; the science is one click away.</li>
           <li><strong>What works best comes first.</strong> Exercises in each area are ordered by strength of evidence and how practical they are to start with.</li>
           <li><strong>Honest evidence labels.</strong> We say when evidence is strong, emerging or mainly clinical experience.</li>
+          <li><strong>Built on psychologists’ own standards — without claiming their endorsement.</strong> The 8-session CBT course follows the CBT competence framework, the elements of a good CBT session, and NICE and NHS Talking Therapies guidance. <a href="#/standards">See the clinical standards</a>, including what the course can’t do.</li>
           <li><strong>Private by design.</strong> No accounts, no uploads, no analytics.</li></ul></div>
         <div class="card flat"><h2 style="font-size:1.2rem">How evidence is graded</h2><div class="stack" style="--gap:8px">${Object.entries(LEVELS).map(([k, v]) => html`<div class="cluster" style="--gap:10px">${levelBadge(k)}<span class="small">${v.desc} <span class="faint">(${counts[k]} exercises)</span></span></div>`)}</div></div>
         <div class="card flat"><h2 style="font-size:1.2rem">How citations were verified</h2><ol>

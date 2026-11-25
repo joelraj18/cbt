@@ -33,7 +33,7 @@ export async function homeView() {
   const skillSeen = pref.get('skill-seen') === dayKey(now);
   const stepsDone = [ci, practised, skillSeen, rf].filter(Boolean).length;
   const prog = programProgress(await store.kvGet('program', null), all, now);
-  const next = has ? recommend({ records: all, now, plan: await store.kvGet('plan', null), programState: await store.kvGet('program', null), limit: 1 })[0] : null;
+  const next = has ? recommend({ records: all, now, plan: await store.kvGet('plan', null), programState: await store.kvGet('program', null), courseState: await store.kvGet('course', null), limit: 1 })[0] : null;
   const todayCard = has ? html`<section class="card today-card-home" style="margin-top:8px"><div class="split">
       <div><p class="eyebrow" style="margin:0">Your day · ${stepsDone} of 4 steps done</p><h2 style="margin:4px 0 6px">${stepsDone === 4 ? 'All done for today — well done.' : !ci ? 'Start with a 30-second check-in' : next ? `Up next — ${next.title}` : 'Keep going'}</h2>
         <div class="meta"><span>${icon('bolt')} ${ds.streak}-day streak</span><span>${icon('calendar')} ${ds.weekPractice}/${ds.weeklyGoal} practice days this week</span>${prog && !prog.finished ? html`<span>${icon('map')} ${prog.program.name}: day ${prog.index + 1} of ${prog.program.days}</span>` : ''}</div></div>
@@ -47,9 +47,10 @@ export async function homeView() {
       <p class="lead">Practical CBT exercises for low mood, anxiety, procrastination, habits, time, intimacy and impulses — explained in plain words with everyday examples, and backed by ${research.length} research papers you can check yourself.</p>
       <div class="cluster" style="margin-top:18px">
         <a class="btn primary" href="#/today">${icon('sun')} Start your daily CBT</a>
-        <a class="btn" href="#/programs">${icon('map')} Follow a guided programme</a>
+        <a class="btn" href="#/course">${icon('target')} Take the 8-session CBT course</a>
         <a class="btn ghost" href="#/learn">${icon('book')} What is CBT? (3-minute read)</a>
       </div>
+      <p class="small muted" style="margin:10px 0 0">Prefer something lighter? Try a <a href="#/programs">2–4 week guided programme</a>. Curious how it’s built? See the <a href="#/standards">clinical standards</a>.</p>
       <div class="meta" style="margin-top:16px"><span>${icon('lock')} Private — saved only on this device</span><span>${icon('check')} ${EXERCISES.length} interactive exercises</span><span>${icon('flask')} ${research.length} verified studies</span><span>${icon('sparkle')} Free · no account</span></div>
     </div></section>
 

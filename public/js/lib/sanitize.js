@@ -4,9 +4,10 @@
 // prototype keys are removed, sizes are capped, and metrics are recomputed by our own code.
 import { EXERCISE_BY_ID } from '../data/exercises/index.js';
 import { ASSESSMENT_BY_ID } from '../data/assessments.js';
+import { COURSE_BY_ID } from '../data/courses.js';
 
-const KINDS = new Set(['exercise', 'assessment', 'mood', 'session', 'daily']);
-const KV_KEY = /^(tool:(ladders|habits|matrix|worries)|plan|safety-plan|daily-settings|program|program-history)$/;
+const KINDS = new Set(['exercise', 'assessment', 'mood', 'session', 'daily', 'course']);
+const KV_KEY = /^(tool:(ladders|habits|matrix|worries)|plan|safety-plan|daily-settings|program|program-history|course|course-history)$/;
 const MAX_STRING = 20000, MAX_ARRAY = 500, MAX_KEYS = 200, MAX_DEPTH = 6;
 const BAD_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -53,7 +54,8 @@ export function sanitizeBackup(input) {
     const ok = r && typeof r === 'object' && typeof r.id === 'string' && r.id.length <= 100 && !seen.has(r.id)
       && KINDS.has(kind) && type && !Number.isNaN(created.getTime())
       && ((kind !== 'exercise' && kind !== 'session') || EXERCISE_BY_ID[type])
-      && (kind !== 'assessment' || ASSESSMENT_BY_ID[type]);
+      && (kind !== 'assessment' || ASSESSMENT_BY_ID[type])
+      && (kind !== 'course' || type === 'session');
     if (!ok) { report.dropped++; continue; }
     seen.add(r.id);
     const data = cleanValue(r.data) || {};
@@ -67,6 +69,11 @@ export function sanitizeBackup(input) {
       const a = ASSESSMENT_BY_ID[type];
       data.answers = (Array.isArray(data.answers) ? data.answers : []).slice(0, a.items.length).map((x) => (x == null ? null : toNum(x)));
       data.extra = toNum(data.extra);
+    } else if (kind === 'course') {
+      data.n = toNum(data.n);
+      for (const k of ['helpful', 'safety']) if (k in data) data[k] = toNum(data[k]);
+      if (!COURSE_BY_ID[data.course] || !(data.n >= 1 && data.n <= 8)) { report.dropped++; seen.delete(r.id); continue; }
+      metrics = { helpful: data.helpful ?? null, adherence: toNum(r.metrics?.adherence) };
     } else if (kind === 'mood') {
       for (const k of ['mood', 'anxiety', 'energy', 'sleep']) if (k in data) data[k] = toNum(data[k]);
       for (const k of ['emotions', 'activities']) data[k] = Array.isArray(data[k]) ? data[k].filter((x) => typeof x === 'string') : [];

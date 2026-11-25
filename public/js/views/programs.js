@@ -33,6 +33,7 @@ export async function programsView() {
       <p class="small muted">${p.summary}</p>
       <p class="small" style="margin:0 0 10px">Based on ${p.refs.map((id, i) => html`${i ? ', ' : ''}${cite(id)}`)}</p>
       <div class="cluster"><a class="btn small" href="#/programs/${p.id}">See all days</a>${st?.id === p.id ? '' : html`<button class="btn small primary" data-start="${p.id}">Start</button>`}</div></article>`)}</div>
+    <div class="callout good section"><div class="callout-title">${icon('target')} Want the full, therapy-style version?</div><p style="margin:0">The <a href="#/course">8-session CBT course</a> adds an assessment with standard questionnaires, your own CBT map and goals, weekly sessions with practice review, and a staying-well plan — structured the way psychologists deliver CBT.</p></div>
     <div class="callout info section"><div class="callout-title">${icon('info')} How programmes work</div><p style="margin:0">Each day unlocks the next calendar day, so practice is spread out — spaced practice sticks better than cramming. You can always choose to go on early. Finishing a day’s exercise ticks it off automatically. Programmes are structured self-help, similar to internet CBT courses ${cite('andersson2019')}, not a replacement for therapy.</p></div>
   </div>`;
   return { title: 'Programmes', body, mount: (root) => on(root, 'click', '[data-start]', (e, b) => confirmStart(b.dataset.start)) };

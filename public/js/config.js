@@ -9,6 +9,21 @@ export const SITE = {
 };
 
 /* ------------------------------------------------------------------------------------
+   Independent clinical review (shown on the Clinical standards page, #/standards).
+   List ONLY people who have actually reviewed the content AND agreed in writing to be named,
+   with their real registration details. Never add names, logos or "endorsed by" claims otherwise.
+   The review checklist for psychologists is in docs/CLINICAL-REVIEW.md.
+   status: 'not-reviewed' | 'in-review' | 'reviewed'
+   ------------------------------------------------------------------------------------ */
+export const CLINICAL_REVIEW = {
+  status: 'not-reviewed',
+  reviewers: [
+    // { name: 'Dr A. Example', role: 'Clinical psychologist', registration: 'HCPC PYL00000', scope: 'Depression and anxiety courses', date: '2027-01-15' },
+  ],
+  contact: '', // optional: an email address or form URL where psychologists can send review feedback
+};
+
+/* ------------------------------------------------------------------------------------
    Google AdSense
    1. Get approved at https://adsense.google.com and copy your publisher ID (ca-pub-…).
    2. Paste it into `client` below and into public/ads.txt (replace the placeholder line).
@@ -29,5 +44,5 @@ export const ADS = {
   },
   showPlaceholders: true,      // show labelled empty boxes while `client` is empty (so you can see the space)
   requireConsent: true,        // ask visitors before loading Google's ad script
-  adFreeRoutes: ['today', 'programs', 'help', 'exercise', 'toolbox', 'check-in', 'journal', 'reports', 'mood', 'plan', 'settings', 'privacy'],
+  adFreeRoutes: ['today', 'programs', 'course', 'standards', 'help', 'exercise', 'toolbox', 'check-in', 'journal', 'reports', 'mood', 'plan', 'settings', 'privacy'],
 };

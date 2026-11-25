@@ -7,10 +7,13 @@ import { research } from '../data/research.js';
 import { ASSESSMENTS } from '../data/assessments.js';
 import { CBT_GUIDE, THINKING_TRAPS, GLOSSARY, FAQ } from '../data/learn.js';
 import { PROGRAMS } from '../data/programs.js';
+import { COURSES } from '../data/courses.js';
 
 export const PAGES = [
   { id: 'home', title: 'Home', url: '#/', summary: 'Start here: check in, choose an area and practise evidence-based CBT exercises.' },
   { id: 'today', title: 'Today — your daily CBT', url: '#/today', summary: 'Daily check-in, personalised practice for today, skill of the day, evening reflection, streaks and daily reminders.' },
+  { id: 'course', title: 'CBT course — 8 weekly sessions', url: '#/course', summary: 'Self-guided CBT structured like therapy: assessment with PHQ-9 and GAD-7, your CBT map (formulation) and goals, five skill sessions with homework, and a staying-well plan. Clinician summary to share.' },
+  { id: 'standards', title: 'Clinical standards', url: '#/standards', summary: 'How the CBT course follows psychologists’ standards: CBT competences, the Cognitive Therapy Scale, NICE and APA guidelines, stepped care, safety rules and the evidence for self-guided CBT.' },
   { id: 'programs', title: 'Guided programmes', url: '#/programs', summary: 'Day-by-day CBT programmes: 28-day CBT Foundations and 14-day programmes for mood, anxiety, focus, habits, time, intimacy and urges.' },
   { id: 'areas', title: 'All areas', url: '#/areas', summary: 'Depression, anxiety, productivity, self-discipline, time management, sexual desire and impulsiveness.' },
   { id: 'toolbox', title: 'Toolbox — quick tools', url: '#/toolbox', summary: 'Breathing pacer, muscle relaxation, urge surfing timer, focus sprints, grounding and the STOP skill.' },
@@ -46,6 +49,8 @@ export function buildIndex() {
   THINKING_TRAPS.forEach((t) => e.add({ id: 'trap:' + t.id, kind: 'learn', title: `Thinking trap: ${t.name}`, url: '#/learn?s=traps', tags: ['thinking trap', 'cognitive distortion'], summary: t.simple, body: `${t.example} ${t.question}` }));
   GLOSSARY.forEach((g) => e.add({ id: 'gl:' + g.term, kind: 'learn', title: g.term, url: '#/learn?s=glossary', tags: ['glossary'], summary: g.def }));
   PROGRAMS.forEach((p) => e.add({ id: 'prog:' + p.id, kind: 'page', area: p.area, title: `Programme: ${p.name} (${p.days} days)`, url: `#/programs/${p.id}`, summary: p.summary, body: p.plan.map((d) => `${d.title} ${d.lesson} ${d.task}`).join(' '), boost: 1.15 }));
+  COURSES.forEach((c) => e.add({ id: 'course:' + c.id, kind: 'page', area: c.area, title: `CBT course: ${c.name} (8 sessions)`, url: '#/course', summary: c.summary, tags: ['therapy', 'course', 'sessions'],
+    body: [c.basis, ...c.modules.map((m) => `${m.title} ${m.learn} ${m.example}`)].join(' '), boost: 1.2 }));
   FAQ.forEach((f, i) => e.add({ id: 'faq:' + i, kind: 'learn', title: f.q, url: '#/learn?s=faq', tags: ['faq'], summary: f.a }));
   const stats = e.build();
   stats.totalMs = perf.now() - t0;

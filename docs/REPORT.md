@@ -6,20 +6,21 @@
 
 ## 1. Summary
 
-CBT Toolkit is a free, private web app with **59 interactive CBT exercises** across seven areas — depression, anxiety, productivity, self-discipline, time management, sexual desire & intimacy, and impulsiveness. It includes **8 questionnaires**, a **progress-report engine**, a **daily practice hub (Today)** with **8 guided programmes**, and a **research library of 188 references**. All 168 references with a DOI were verified against Crossref's DOI registry, and the key numbers in 153 were checked against their PubMed (127) or OpenAlex (26) abstracts.
+CBT Toolkit is a free, private web app with **59 interactive CBT exercises** across seven areas — depression, anxiety, productivity, self-discipline, time management, sexual desire & intimacy, and impulsiveness. It includes **7 eight-session CBT courses** structured the way psychologists deliver CBT, **9 questionnaires**, a **progress-report engine**, a **daily practice hub (Today)** with **8 guided programmes**, and a **research library of 205 references**. All 182 references with a DOI were verified against Crossref's DOI registry, and the key numbers in 167 were checked against their PubMed (139) or OpenAlex (28) abstracts.
 
 The guiding principle is to **explain things simply and show the science openly**. Every area and exercise starts with a plain-language explanation and an everyday example. Every claim links to its source, and every operation the app performs is timed and shown to the user.
 
 | What | Result |
 |---|---|
+| CBT courses | 7 × 8 weekly sessions. Each has an assessment with stepped-care triage, a CBT map and goals, 5 evidence-based skill sessions and a staying-well plan, plus not-on-track alerts and a printable clinician summary. |
 | Exercises | 59 (12 rated A · 37 B · 9 C · 1 D) |
-| Questionnaires | PHQ-9, GAD-7, WHO-5 (validated, verbatim) + 5 original area check-ins |
-| References | 188 (76 meta-analyses/reviews/guidelines · 30 randomised trials · 82 other studies, books, measures) |
-| Verification | 168 DOIs resolved via Crossref · numbers in 153 checked against abstracts (127 PubMed, 26 OpenAlex) |
+| Questionnaires | PHQ-9, GAD-7, WHO-5 (validated, verbatim), plus an original life impact check and 5 original area check-ins |
+| References | 205: meta-analyses, reviews and guidelines; randomised trials; and other studies, books and measures |
+| Verification | 182 DOIs resolved via Crossref · numbers in 167 checked against abstracts (139 PubMed, 28 OpenAlex) |
 | Daily practice | Today hub (check-in → personalised practice → skill of the day → reflection), streaks and weekly goal, 8 programmes (126 programme days), calendar reminders, installable app |
 | App start-up | ≈ 140 ms to interactive (local, headless Chromium) |
 | Search | 349 documents · 3,301 terms indexed in ≈ 48 ms · ≈ 6.5 ms per query |
-| Tests | 55/55 unit tests · 288/288 route renders with 0 JS errors · 32/32 end-to-end checks · 0 axe-core accessibility violations · no sideways scrolling at 320 px |
+| Tests | 65/65 unit tests · 296/296 route renders with 0 JS errors · 40/40 end-to-end checks · full 8-session course walk-throughs for 5 courses (25/25 each) · 0 axe-core violations, including every step of every session · no sideways scrolling at 320 px |
 | Privacy | 0 bytes of user data sent anywhere; IndexedDB + optional AES-256-GCM encrypted backups |
 
 ---
@@ -37,6 +38,7 @@ The guiding principle is to **explain things simply and show the science openly*
 | "I also want to have this report" | In-app progress reports (print/PDF, HTML, JSON, CSV), plus this project report. |
 | *Added:* simple and understandable, with examples (like the Mind video) | A "What is CBT?" guide in plain words: the thought–feeling–behaviour cycle, how it becomes a habit, how CBT breaks it, and whether CBT is right for you. An interactive cycle diagram has 8 everyday examples, and every exercise has a worked example. All text is original. |
 | *Added:* room for Google AdSense | Reserved fixed-height slots, a consent prompt and ad-free sensitive pages. Also `ads.txt`, the privacy disclosures, and a build-time CSP switch. |
+| *Added:* make it therapy level, backed by psychologists | No site can truthfully claim every psychologist's backing, so the site claims none. Instead, 7 courses × 8 sessions follow psychologists' own standards:<br>• session elements of the Cognitive Therapy Scale–Revised;<br>• the five-domain CBT competence framework;<br>• NICE NG222/CG113 stepped care and NHS Talking Therapies measures;<br>• APA guidance.<br><br>It also provides an assessment with safety and suitability screening, a case formulation, goals, weekly measures with reliable-change and not-on-track alerts, homework review, relapse prevention, and a clinician summary for sharing. The Clinical standards page rates its own coverage and limits. A review kit (`docs/CLINICAL-REVIEW.md`) lets real psychologists review and sign off, and they are named only with consent. |
 | *Added:* audit and improve; help me do CBT daily | A full audit with fixes (see `docs/AUDIT.md`). A **Today** page is the app's start page: a 30-second check-in, up to four suggestions each with a reason and its study, a skill of the day, and an evening reflection. Also streaks, a weekly goal, guided day-by-day programmes, daily calendar reminders and an install prompt. |
 
 ---
@@ -90,6 +92,15 @@ Cross-cutting evidence that shaped the design:
 - **Search engine.** BM25F with field boosts (title ×3, tags ×2.2, summary ×1.6), Porter stemming, UK/US spelling normalisation, synonyms, prefix expansion, Damerau–Levenshtein typo tolerance against surface words and stems, phrase filtering, facets and snippets. The user's own entries get a separate, in-memory personal index.
 - **Charts.** Dependency-free SVG line charts (severity bands and a keyboard-accessible crosshair tooltip), bars and columns, and a calendar heatmap. Every chart has a data-table view, and the colours come from a CVD-validated categorical palette.
 - **Reports.** A pure, unit-tested engine produces the overview, questionnaire trends with Jacobson–Truax/NHS reliable change, mood trend (least-squares slope), exercise findings and research-linked insights. The UI reveals each step with its measured time.
+- **CBT course engine.** `lib/therapy.js` holds pure, unit-tested functions:
+  - session plans and measurement schedules;
+  - weekly pacing and practice adherence;
+  - stepped-care triage (NICE thresholds, and Karyotaki et al., 2021 on when support helps);
+  - NHS Talking Therapies reliable change and recovery;
+  - safety and not-on-track alerts (Lambert et al., 2018; de Jong et al., 2021);
+  - calendar reminders.
+
+  Sessions run in the shared form engine with autosaved drafts. Questionnaire answers become ordinary check-in records, so reports and history include them.
 - **Daily coach.** `lib/coach.js` holds pure, unit-tested functions. They compute streaks and the weekly goal, today's steps, and programme progress. Pacing is one programme day per calendar day, and days tick themselves off when the matching exercise or check-in is saved. They also rank suggestions from today's check-in, the weekly plan, the programme, measurement due dates and the time of day. Every suggestion carries a reason and a citation. Safety comes first: a recently endorsed PHQ-9 item 9 puts "Talk to someone today" at the top.
 - **Offline/PWA.** A service worker precaches every app file with a content-hash version. The app opens on Today, with shortcuts to Today, mood log, toolbox and help. Navigations are network-first and assets stale-while-revalidate. The app has a manifest, icons and shortcuts.
 - **Security.** No inline scripts, and all interpolations are escaped by the safe `html` tagged template, including computed exercise outputs. Imported backups are validated and sanitised: known kinds only, schema-typed fields, no prototype keys, capped depth. The CSP is strict (`script-src 'self'`) unless AdSense is configured. Cloudflare `_headers` add nosniff, referrer and permissions policies, frame protection and COOP.
@@ -114,8 +125,8 @@ Cross-cutting evidence that shaped the design:
 | Unit tests (`npm test`) | **55/55 pass**: the daily coach (streaks, weekly goal, suggestions, safety-first, programme pacing and catch-up, programme and citation integrity, reminders), backup-import sanitising, search relevance, typo tolerance, synonyms, phrases, facets and speed; PHQ-9/GAD-7/WHO-5 scoring and bands; self-harm flag; reliable change and recovery; report engine; sleep efficiency; statistics; .ics validity; encryption round-trip. Content integrity covers every exercise's fields, forms, references and functions, every reference is used, and crisis lines exist. |
 | Route smoke test (headless Chromium) | **288/288** views render (every area, all 59 exercises × 4 tabs, every check-in, programme and page, plus unknown IDs) with **0** JavaScript errors |
 | End-to-end flows (`npm run e2e`) | **32/32**: quick mood, 5-step thought record, history, PHQ-9 scoring, search palette, fear ladder, habit tracker, urge-surfing tracker, breathing pacer. The full daily loop: check-in, suggestions, programme start, day 1 ticking itself off, skill, reflection, streak and calendar reminders. Then report pipeline and backup → delete-all → restore. |
-| Accessibility (axe-core, WCAG 2.2 AA + best practice) | **0 violations** on 35 routes in light and dark, plus first-visit and active-programme states (147 found and fixed in the audit) |
-| Mobile | No horizontal page overflow on any of 218 routes at 320 px and 375 px |
+| Accessibility (axe-core, WCAG 2.2 AA + best practice) | **0 violations** on 38 routes in light and dark, plus first-visit, active-programme and active-course states, and every step of all 8 course sessions (147 found and fixed in the audit) |
+| Mobile | No horizontal page overflow on any of 224 routes at 320 px and 375 px, including every step of a course session |
 | Performance (median of 3) | Ready in 142 ms · index 47.8 ms · DOMContentLoaded 67 ms · query avg 6.5 ms (max 12.5 ms) · report compute 1.1 ms · planning a day from 1,000 entries 2–4 ms · 843 KB uncompressed over 66 files (compressed further by Cloudflare) |
 
 **Bugs found and fixed during QA**
@@ -131,7 +142,8 @@ The later audit (accessibility, security, mobile, links, bugs and daily-use UX) 
 
 ## 8. Limitations and next steps
 
-- **Not a clinical service.** Content is educational. A clinical review by a licensed psychologist is recommended before promoting the site as a clinical tool.
+- **Not a clinical service.** Content is educational. A licensed psychologist should review it (using `docs/CLINICAL-REVIEW.md`) before the site is promoted as a clinical tool.
+- **The courses themselves are untested.** Each course combines methods with trial evidence, but the courses have not been evaluated in their own trial. Self-guided CBT works better with human support (Gellatly et al., 2007; Karyotaki et al., 2021), so the course recommends a supporter at moderate or higher scores.
 - **Area check-ins are original and unvalidated** for productivity, self-discipline, time management, desire and impulsiveness. Validated scales such as the Pure Procrastination Scale, Brief Self-Control Scale, BIS-11 and FSFI may require licences or permission.
 - **SEO.** Hash routes are not indexed individually. Pre-rendering static HTML pages per area and exercise would improve discoverability.
 - **Languages.** English only. The content-as-data design makes translation straightforward.

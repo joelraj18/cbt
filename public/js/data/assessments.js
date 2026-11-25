@@ -16,6 +16,11 @@ const WHO = [
   { value: 2, label: 'Less than half of the time' }, { value: 1, label: 'Some of the time' }, { value: 0, label: 'At no time' },
 ];
 
+const IMPACT = [
+  { value: 0, label: 'Not at all' }, { value: 1, label: 'A little' }, { value: 2, label: 'Moderately' },
+  { value: 3, label: 'A lot' }, { value: 4, label: 'Completely' },
+];
+
 const band = (label, tone, advice) => ({ label, tone, advice });
 
 export const ASSESSMENTS = [
@@ -99,6 +104,32 @@ export const ASSESSMENTS = [
     refs: ['topp2015'],
     attribution: 'WHO-5 Well-Being Index © Psychiatric Research Unit, WHO Collaborating Centre in Mental Health, Frederiksborg General Hospital. Free to use.',
     chartBands: [{ from: 0, to: 28.5, label: 'Low', fill: 'var(--band-high)' }, { from: 28.5, to: 50.5, label: 'Below avg', fill: 'var(--band-mid)' }, { from: 75.5, to: 100, label: 'Good', fill: 'var(--band-good)' }],
+  },
+  {
+    // Everyday functioning matters as much as symptoms. These questions are ORIGINAL; they cover similar areas of life to
+    // standard functioning measures, but they are not the Work and Social Adjustment Scale and are not validated.
+    id: 'impact', name: 'Life impact', title: 'Life impact check', area: 'general', minutes: 1, validated: false, allowNA: true,
+    intro: 'Over the last 2 weeks, how much have your difficulties got in the way of each part of your life?',
+    options: IMPACT,
+    items: [
+      'Work, study or volunteering',
+      'Looking after your home, money and everyday tasks',
+      'Social life and time with other people',
+      'Time on your own: hobbies, interests and rest',
+      'Close relationships with a partner, family or friends',
+    ],
+    max: 100, higherIsWorse: true, percent: true,
+    bands: [
+      { min: 0, max: 24, ...band('Little impact', 'good', 'Your difficulties are not getting in the way of daily life much right now.') },
+      { min: 25, max: 49, ...band('Some impact', 'info', 'Your difficulties are affecting parts of daily life. Watch which areas improve as you practise.') },
+      { min: 50, max: 74, ...band('Considerable impact', 'warn', 'Your difficulties are getting in the way of a lot of daily life. Consider talking to a doctor or therapist alongside self-help.') },
+      { min: 75, max: 100, ...band('Severe impact', 'crisis', 'Your difficulties are affecting almost every part of life. Please talk to a doctor or mental health professional about support.') },
+    ],
+    reliableChange: 20,
+    flags: () => [],
+    refs: ['mundt2002'],
+    attribution: 'Original questions written for CBT Toolkit. They cover similar areas of life to standard functioning measures such as the Work and Social Adjustment Scale (Mundt et al., 2002), but this is not the WSAS, it is not validated, and its scores cannot be compared with WSAS scores.',
+    chartBands: [{ from: 0, to: 24.5, label: 'Little', fill: 'var(--band-good)' }, { from: 49.5, to: 74.5, label: 'Considerable', fill: 'var(--band-mid)' }, { from: 74.5, to: 100, label: 'Severe', fill: 'var(--band-high)' }],
   },
   checkin('checkin-productivity', 'productivity', 'Productivity check-in', [
     'I put off important tasks until the last minute.',

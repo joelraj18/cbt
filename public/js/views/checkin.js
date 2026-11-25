@@ -22,7 +22,7 @@ export async function checkinListView() {
     body: html`<div class="container">${pageHead({ title: 'Check-ins', lede: 'Short questionnaires give you a starting point and show whether things are really changing. Re-take them every 2 weeks.' })}
       <div class="callout info" style="margin-bottom:20px"><div class="callout-title">${icon('info')} Why measure?</div><p style="margin:0">Tracking scores regularly and acting on them improves outcomes — it shows when something is working and when to change course ${cite('lambert2018')}. We use the same "reliable change" thresholds as NHS psychological therapy services ${cite('nhs-tt-manual')}.</p></div>
       <h2>Validated questionnaires</h2><div class="grid" style="--min:280px">${ASSESSMENTS.filter((a) => a.validated).map(card)}</div>
-      <h2 class="section">Area check-ins</h2><p class="muted small">Original self-reflection questions for the other five areas — useful for tracking your own change, but not validated and never a diagnosis.</p>
+      <h2 class="section">Area and everyday-life check-ins</h2><p class="muted small">Original self-reflection questions for the other five areas and for how much your difficulties affect daily life — useful for tracking your own change, but not validated and never a diagnosis.</p>
       <div class="grid" style="--min:280px">${ASSESSMENTS.filter((a) => !a.validated).map(card)}</div></div>`,
   };
 }

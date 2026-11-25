@@ -133,12 +133,13 @@ function showResult(el, ex, rec, show) {
   try { lines = (ex.feedback ? ex.feedback(rec.data, m) : []).filter(Boolean); } catch { /* ignore */ }
   const events = ex.calendar ? ex.calendar(rec.data) : [];
   const count = store.query({ type: ex.id }).length;
+  const fromCourse = /[?&]from=course\b/.test(location.hash);
   el.innerHTML = String(html`<div class="card" style="border-color:var(--good)">
     <div class="callout good"><div class="callout-title">${icon('check')} Saved — nice work.</div><p style="margin:0">That's entry #${count} for this exercise. It is stored only on this device.</p></div>
     ${lines.length ? html`<ul class="ticks" style="margin-top:14px">${lines.map((l) => html`<li>${l}</li>`)}</ul>` : ''}
     <div class="cluster" style="margin-top:14px">
       ${events.length ? html`<button class="btn soft" data-ics>${icon('calendar')} Add to calendar (${events.length})</button>` : ''}
-      <a class="btn primary" href="#/today">${icon('sun')} Back to Today</a>
+      ${fromCourse ? html`<a class="btn primary" href="#/course/session">${icon('back')} Back to your session</a><a class="btn" href="#/today">${icon('sun')} Today</a>` : html`<a class="btn primary" href="#/today">${icon('sun')} Back to Today</a>`}
       <button class="btn" data-again>${icon('plus')} New entry</button>
       <button class="btn ghost" data-hist>${icon('chart')} See my history</button>
       <a class="btn ghost" href="#/reports">${icon('activity')} Progress report</a>

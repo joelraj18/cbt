@@ -6,8 +6,9 @@ import { ASSESSMENT_BY_ID } from '../data/assessments.js';
 import { AREA_BY_ID } from '../data/areas.js';
 import { PROGRAM_BY_ID } from '../data/programs.js';
 import { dayKey, startOfDay, addDays, startOfWeek, daysBetween } from '../core/format.js';
+import { courseProgress, courseAlerts } from './therapy.js';
 
-export const PRACTICE_KINDS = new Set(['exercise', 'session', 'daily', 'assessment']);
+export const PRACTICE_KINDS = new Set(['exercise', 'session', 'daily', 'assessment', 'course']);
 export const MILESTONES = [3, 7, 14, 21, 30, 50, 66, 100, 150, 200, 365];
 export const DEFAULT_SETTINGS = { morning: '08:00', evening: '21:00', weeklyGoal: 5 };
 
@@ -110,7 +111,7 @@ export function dayTarget(day) {
  * Personalised suggestions for today, highest priority first.
  * input: { records, now, plan, programState, limit }
  */
-export function recommend({ records = [], now = new Date(), plan = null, programState = null, limit = 4 } = {}) {
+export function recommend({ records = [], now = new Date(), plan = null, programState = null, courseState = null, limit = 4 } = {}) {
   const cands = [];
   const done = typesDoneToday(records, now);
   const add = (c) => {
@@ -132,6 +133,25 @@ export function recommend({ records = [], now = new Date(), plan = null, program
   const phq = latest(records, (r) => r.kind === 'assessment' && r.type === 'phq9');
   if (phq && daysBetween(phq.createdAt, now) <= 14 && Number(phq.data?.answers?.[8]) > 0) {
     add({ kind: 'help', key: 'help', title: 'Talk to someone today', href: '#/help', minutes: 5, priority: 100, reason: 'Your recent depression check-in mentioned thoughts of self-harm or being better off dead. Reaching out — and making a safety plan — matters more than any exercise.', refs: ['stanley2018'] });
+  }
+
+  // 0b. CBT course: safety and "not on track" alerts, the weekly session when it is due, and the practice set in the last session.
+  const cp = courseProgress(courseState, records, now);
+  if (cp) {
+    for (const al of courseAlerts(courseState, records, now)) {
+      if (al.id === 'risk') add({ kind: 'help', key: 'help', title: 'Talk to someone today', href: '#/help', minutes: 5, priority: 100, reason: al.text, refs: al.refs });
+      else add({ kind: 'review', key: 'course-review', title: al.title, href: '#/course', minutes: 5, priority: 95, reason: al.text, refs: al.refs });
+    }
+    if (!cp.finished && cp.due) {
+      add({ kind: 'course', key: 'course', title: `CBT course — session ${cp.next}: ${cp.plan.title}`, href: '#/course/session', minutes: cp.plan.minutes, priority: 92,
+        reason: cp.next === 1 ? 'Start your CBT course with a 25-minute assessment: your problem in your words, standard questionnaires and the right level of support.' : 'Your weekly CBT session is ready. Guided self-help usually runs to about 8 regular weekly sessions.',
+        refs: ['nice-ng222'] });
+    }
+    if (!cp.finished) {
+      for (const h of cp.homework.items) {
+        if (!h.complete) add({ ex: h.ex, priority: 62 + Math.min(10, (h.perWeek - h.done) * 2), reason: `Practice from your CBT course: ${h.done} of ${h.perWeek} done since your last session. Practice between sessions is where change happens.`, refs: ['kazantzis2010'] });
+      }
+    }
   }
 
   // 1. Today's programme day.

@@ -4,7 +4,7 @@ import { icon } from '../core/icons.js';
 import { store } from '../core/store.js';
 import { perf } from '../core/perf.js';
 import { go } from '../core/router.js';
-import { fmtDate, fmtTime, dayKey } from '../core/format.js';
+import { fmtDate, fmtTime, fmtDay, dayKey } from '../core/format.js';
 import { AREAS, AREA_BY_ID, areaColor } from '../data/areas.js';
 import { EXERCISE_BY_ID } from '../data/exercises/index.js';
 import { PROGRAMS } from '../data/programs.js';
@@ -13,6 +13,8 @@ import { SITE } from '../config.js';
 import { dailyStats, todaysCheckin, todaysReflection, typesDoneToday, recommend, programProgress, autoCompleteProgram, dayTarget, reminderEvents, DEFAULT_SETTINGS } from '../lib/coach.js';
 import { buildICS } from '../lib/ics.js';
 import { canInstall, promptInstall, isIOS, isStandalone, onInstallChange } from '../lib/install.js';
+import { courseProgress } from '../lib/therapy.js';
+import { SESSION_COUNT } from '../data/courses.js';
 import { pageHead, cite, levelBadge, areaChip, crisisCallout } from '../ui/components.js';
 
 // Where to land after the page re-renders (e.g. straight to today's practice after checking in).
@@ -39,6 +41,7 @@ export async function todayView() {
     programState = upd;
   }
   const plan = await store.kvGet('plan', null);
+  const courseState = await store.kvGet('course', null);
   const records = store.all();
   const stats = dailyStats(records, now, settings.weeklyGoal);
   const checkin = todaysCheckin(records, now);
@@ -46,7 +49,8 @@ export async function todayView() {
   const doneTypes = typesDoneToday(records, now);
   const practisedToday = records.some((r) => r.kind === 'exercise' && dayKey(r.createdAt) === dayKey(now));
   const prog = programProgress(programState, records, now);
-  const recs = recommend({ records, now, plan, programState, limit: 4 });
+  const recs = recommend({ records, now, plan, programState, courseState, limit: 4 });
+  const cp = courseProgress(courseState, records, now);
   const skill = skillForDate(now);
   const skillSeen = pref.get('skill-seen') === dayKey(now);
   const evening = now.getHours() >= 17;
@@ -105,6 +109,7 @@ export async function todayView() {
       </div>
 
       <aside class="stack" style="--gap:20px">
+        ${courseCard(cp)}
         ${programCard(prog)}
         <section class="card flat" aria-labelledby="h-stay">
           <h2 class="h3" id="h-stay">${icon('calendar')} Stay on track</h2>
@@ -225,10 +230,27 @@ function reflectForm() {
 
 function recCard(r) {
   return html`<article class="rec-card" style="--area:${r.area && AREA_BY_ID[r.area] ? areaColor(r.area) : 'var(--primary)'}">
-    <div class="rec-main"><div class="cluster" style="--gap:6px;margin-bottom:4px">${r.kind === 'program' ? html`<span class="badge ev-B">Programme</span>` : r.kind === 'checkin' ? html`<span class="badge">Check-in</span>` : r.kind === 'help' ? html`<span class="badge ev-D">Support</span>` : ''}${r.level ? levelBadge(r.level, false) : ''}<span class="badge">${r.minutes} min</span>${r.area && AREA_BY_ID[r.area] ? areaChip(r.area) : ''}</div>
+    <div class="rec-main"><div class="cluster" style="--gap:6px;margin-bottom:4px">${r.kind === 'program' ? html`<span class="badge ev-B">Programme</span>` : r.kind === 'course' ? html`<span class="badge ev-B">CBT course</span>` : r.kind === 'review' ? html`<span class="badge ev-C">Review</span>` : r.kind === 'checkin' ? html`<span class="badge">Check-in</span>` : r.kind === 'help' ? html`<span class="badge ev-D">Support</span>` : ''}${r.level ? levelBadge(r.level, false) : ''}<span class="badge">${r.minutes} min</span>${r.area && AREA_BY_ID[r.area] ? areaChip(r.area) : ''}</div>
       <h3 class="h4" style="margin:2px 0 4px">${r.title}</h3>
       <p class="small muted" style="margin:0"><strong>Why today:</strong> ${r.reason} ${(r.refs || []).map((id) => cite(id))}</p></div>
-    <a class="btn ${r.kind === 'help' ? 'danger' : 'primary'} small" href="${r.href}">${r.kind === 'help' ? 'Get support' : 'Start'} ${icon('arrow')}</a></article>`;
+    <a class="btn ${r.kind === 'help' ? 'danger' : r.kind === 'review' ? '' : 'primary'} small" href="${r.href}">${r.kind === 'help' ? 'Get support' : r.kind === 'review' ? 'Review' : 'Start'} ${icon('arrow')}</a></article>`;
+}
+
+function courseCard(cp) {
+  if (!cp) {
+    return html`<section class="card" aria-labelledby="h-course"><h2 class="h3" id="h-course">${icon('target')} CBT course</h2>
+      <p class="small muted">The full, therapy-style version: ${SESSION_COUNT} weekly sessions with an assessment, your own CBT map, five skills and a staying-well plan.</p>
+      <a class="btn small primary" href="#/course">Choose a course</a></section>`;
+  }
+  const c = cp.course;
+  return html`<section class="card" aria-labelledby="h-course" style="--area:${areaColor(c.area)}">
+    <div class="split"><h2 class="h3" id="h-course" style="margin:0">${icon('target')} ${c.name}</h2><a class="small" href="#/course">Course</a></div>
+    <div class="progress" style="margin:10px 0 6px" role="progressbar" aria-valuenow="${cp.completed}" aria-valuemin="0" aria-valuemax="${SESSION_COUNT}" aria-label="Course progress"><span style="width:${cp.percent}%"></span></div>
+    <p class="small faint" style="margin:0 0 10px">${cp.completed} of ${SESSION_COUNT} sessions done</p>
+    ${cp.finished ? html`<p class="small" style="margin:0">Course complete. Keep your staying-well plan handy and a little practice in your week.</p>`
+      : cp.due ? html`<p class="small"><strong>Session ${cp.next}: ${cp.plan.title}</strong> is ready (about ${cp.plan.minutes} minutes).</p><a class="btn small primary" href="#/course/session">${icon('play')} Start session ${cp.next}</a>`
+      : html`<p class="small" style="margin:0">Next session from <strong>${fmtDay(cp.dueAt)}</strong>.${cp.homework.target ? ` Practice so far: ${cp.homework.done} of ${cp.homework.target}.` : ''}</p>`}
+  </section>`;
 }
 
 function programCard(pr) {
